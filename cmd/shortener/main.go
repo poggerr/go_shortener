@@ -37,7 +37,6 @@ func getPage(res http.ResponseWriter, id string) {
 	//}
 	s := strings.Split(id, "/")
 	ans := app.UnShorting(s[1])
-
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
 
