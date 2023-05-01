@@ -9,7 +9,7 @@ const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var mainMap = make(map[string]string)
 
 func Shorting(oldUrl string) string {
-	b := make([]byte, 5)
+	b := make([]byte, 8)
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
