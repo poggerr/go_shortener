@@ -48,7 +48,7 @@ func TestMainHendler(t *testing.T) {
 				body := []byte(tt.oldUrl)
 				request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(body))
 				w := httptest.NewRecorder()
-				h := mainHendler
+				h := postPage
 				h(w, request)
 
 				result := w.Result()
@@ -58,11 +58,15 @@ func TestMainHendler(t *testing.T) {
 			})
 		case "testGet":
 			t.Run(tt.name, func(t *testing.T) {
-				tt.newUrl = app.Shorting(tt.oldUrl)
-				target := "/" + tt.newUrl
+				target := "/"
+				for key, value := range app.MainMap {
+					if value == tt.oldUrl {
+						target += key
+					}
+				}
 				request := httptest.NewRequest(http.MethodGet, target, nil)
 				w := httptest.NewRecorder()
-				h := mainHendler
+				h := getPage
 				h(w, request)
 
 				result := w.Result()
