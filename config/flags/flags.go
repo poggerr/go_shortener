@@ -20,6 +20,13 @@ func ParseFlags() {
 		DefUrl += "/"
 	}
 
+	if servRunAddr := os.Getenv("SERVER_ADDRESS"); servRunAddr != "" {
+		Serv = servRunAddr
+	}
+	if baseRunAddr := os.Getenv("BASE_URL"); baseRunAddr != "" {
+		DefUrl = baseRunAddr
+	}
+
 	if err != nil {
 		return
 	}
