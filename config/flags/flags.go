@@ -15,9 +15,8 @@ func ParseFlags() {
 	mainFlags.StringVar(&DefUrl, "b", "http://localhost:8080", "write down default url")
 
 	err := mainFlags.Parse(os.Args[1:])
-
-	if string(DefUrl[len(DefUrl)-1]) != "/" {
-		DefUrl += "/"
+	if err != nil {
+		return
 	}
 
 	if servRunAddr := os.Getenv("SERVER_ADDRESS"); servRunAddr != "" {
@@ -27,7 +26,7 @@ func ParseFlags() {
 		DefUrl = baseRunAddr
 	}
 
-	if err != nil {
-		return
+	if string(DefUrl[len(DefUrl)-1]) != "/" {
+		DefUrl += "/"
 	}
 }
