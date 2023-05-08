@@ -12,8 +12,14 @@ var DefUrl string
 func ParseFlags() {
 
 	mainFlags.StringVar(&Serv, "a", ":8080", "write down server")
-	mainFlags.StringVar(&DefUrl, "b", "http://localhost:8080/", "write down default url")
+	mainFlags.StringVar(&DefUrl, "b", "http://localhost:8080", "write down default url")
+
 	err := mainFlags.Parse(os.Args[1:])
+
+	if string(DefUrl[len(DefUrl)-1]) != "/" {
+		DefUrl += "/"
+	}
+
 	if err != nil {
 		return
 	}

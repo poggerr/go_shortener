@@ -14,7 +14,6 @@ func main() {
 	r := routers.Routers()
 
 	fmt.Println("Running server on", flags.Serv)
-	fmt.Println("DefUrl: ", flags.DefUrl)
 
 	log.Fatal(http.ListenAndServe(flags.Serv, r))
 }
