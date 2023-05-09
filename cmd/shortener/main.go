@@ -13,7 +13,7 @@ func main() {
 
 	r := routers.Routers()
 
-	fmt.Println("Running server on", flags.Serv)
+	fmt.Println("Running server on", flags.ReturnServ())
 
-	log.Fatal(http.ListenAndServe(flags.Serv, r))
+	log.Fatal(http.ListenAndServe(flags.ReturnServ(), r))
 }

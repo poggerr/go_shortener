@@ -36,7 +36,7 @@ func PostPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	local := flags.DefUrl
+	local := flags.ReturnDefUrl()
 
 	local += app.Shorting(string(body))
 
