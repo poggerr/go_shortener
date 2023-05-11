@@ -1,33 +1,29 @@
 package handlers
 
 import (
+	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/poggerr/go_shortener/config/flags"
-	"github.com/poggerr/go_shortener/internal/app"
+	"github.com/poggerr/go_shortener/config"
+	"github.com/poggerr/go_shortener/internal/app/shorten"
 	"io"
+	"log"
 	"net/http"
+	"os"
 )
 
 func GetPage(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
-		http.Error(res, "Only GET requests are allowed!", http.StatusBadRequest)
-		return
-	}
 	id := chi.URLParam(req, "id")
-	ans := app.UnShorting(id)
+	ans := shorten.UnShoring(id)
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
 
 }
 
 func PostPage(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(res, "Only Post requests are allowed!", http.StatusBadRequest)
-		return
-	}
-
 	if err := req.ParseForm(); err != nil {
-		res.Write([]byte(err.Error()))
+		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+		fmt.Println(err.Error())
+		res.Write([]byte("Ошибка запроса"))
 		return
 	}
 
@@ -36,9 +32,13 @@ func PostPage(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	local := flags.ReturnDefUrl()
+	local := config.GetDefUrl()
 
-	local += app.Shorting(string(body))
+	if string(local[len(local)-1]) != "/" {
+		local += "/"
+	}
+
+	local += shorten.Shorting(string(body))
 
 	res.Header().Set("content-type", "text/plain ")
 

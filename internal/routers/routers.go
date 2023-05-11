@@ -5,7 +5,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/handlers"
 )
 
-func Routers() *chi.Mux {
+func Routers() chi.Router {
 	r := chi.NewRouter()
 	r.Route("/", func(r chi.Router) {
 		r.Post("/", handlers.PostPage)
