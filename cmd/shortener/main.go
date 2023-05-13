@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/poggerr/go_shortener/config"
+	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/routers"
 	"log"
 	"net/http"

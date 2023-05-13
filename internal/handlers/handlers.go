@@ -3,8 +3,8 @@ package handlers
 import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/poggerr/go_shortener/config"
 	"github.com/poggerr/go_shortener/internal/app/shorten"
+	"github.com/poggerr/go_shortener/internal/config"
 	"io"
 	"log"
 	"net/http"
