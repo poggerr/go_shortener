@@ -42,8 +42,8 @@ func TestHandlersPost(t *testing.T) {
 		{method: "POST", url: "https://practicum.yandex.ru/", contentType: "text/plain", status: 201},
 		{method: "POST", url: "https://www.google.com/", contentType: "text/plain", status: 201},
 		{method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
-		{method: "GET", url: "https://practicum.yandex.ru/", contentType: "text/plain", status: 307, location: "https://practicum.yandex.ru/"},
-		{method: "GET", url: "https://www.google.com/", contentType: "text/plain", status: 307, location: "https://www.google.com/"},
+		{method: "GET", url: "https://practicum.yandex.ru/", status: 200, location: "https://practicum.yandex.ru/"},
+		{method: "GET", url: "https://www.google.com/", status: 200, location: "https://www.google.com/"},
 	}
 
 	for _, v := range testTable {
@@ -55,18 +55,17 @@ func TestHandlersPost(t *testing.T) {
 			if v.url != "" {
 				mainMap[v.url] = respBody
 			}
-			//case "GET":
-			//	newUrl := "/"
-			//	for key, value := range mainMap {
-			//		if key == v.location {
-			//			newUrl += value
-			//		}
-			//	}
-			//
-			//	resp, _ := testRequestPost(t, ts, http.MethodGet, newUrl, "")
-			//	assert.Equal(t, v.status, resp.StatusCode)
-			//	assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
-			//	assert.Equal(t, v.contentType, resp.Header.Get("Location"))
+		case "GET":
+			newUrl := "/"
+			for key, value := range mainMap {
+				if key == v.location {
+					newUrl += value
+				}
+			}
+
+			resp, _ := testRequestPost(t, ts, http.MethodGet, newUrl, "")
+			assert.Equal(t, v.status, resp.StatusCode)
+			assert.Equal(t, v.contentType, resp.Header.Get("Location"))
 		}
 
 	}
