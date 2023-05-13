@@ -34,11 +34,14 @@ func PostPage(res http.ResponseWriter, req *http.Request) {
 
 	local := config.GetDefUrl()
 
-	if string(local[len(local)-1]) != "/" {
-		local += "/"
+	short, err := shorten.Shorting(string(body))
+
+	if err != nil {
+		http.Error(res, "Введите ссылку", http.StatusBadRequest)
+		return
 	}
 
-	local += shorten.Shorting(string(body))
+	local += short
 
 	res.Header().Set("content-type", "text/plain ")
 

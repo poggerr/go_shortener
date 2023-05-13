@@ -20,6 +20,10 @@ func ParseServ() {
 	if baseRunAddr := os.Getenv("BASE_URL"); baseRunAddr != "" {
 		defUrl = baseRunAddr
 	}
+
+	if string(defUrl[len(defUrl)-1]) != "/" {
+		defUrl += "/"
+	}
 }
 
 func GetServ() string {
