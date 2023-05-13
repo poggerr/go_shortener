@@ -10,12 +10,12 @@ import (
 	"testing"
 )
 
-//var mainMap = make(map[string]string)
+var mainMap = make(map[string]string)
 
-func testRequest(t *testing.T, ts *httptest.Server, method,
+func testRequestPost(t *testing.T, ts *httptest.Server, method,
 	path string, oldUrl string) (*http.Response, string) {
-	reqBody := []byte(oldUrl)
-	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer(reqBody))
+
+	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer([]byte(oldUrl)))
 	require.NoError(t, err)
 
 	resp, err := ts.Client().Do(req)
@@ -33,101 +33,42 @@ func TestHandlersPost(t *testing.T) {
 	defer ts.Close()
 
 	var testTable = []struct {
+		method      string
 		url         string
 		contentType string
 		status      int
+		location    string
 	}{
-		{"https://practicum.yandex.ru/", "text/plain ", 201},
+		{method: "POST", url: "https://practicum.yandex.ru/", contentType: "text/plain", status: 201},
+		{method: "POST", url: "https://www.google.com/", contentType: "text/plain", status: 201},
+		{method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
+		{method: "GET", url: "https://practicum.yandex.ru/", contentType: "text/plain", status: 307, location: "https://practicum.yandex.ru/"},
+		{method: "GET", url: "https://www.google.com/", contentType: "text/plain", status: 307, location: "https://www.google.com/"},
 	}
 
 	for _, v := range testTable {
-		resp, _ := testRequest(t, ts, "POST", "/", v.url)
-		assert.Equal(t, v.status, resp.StatusCode)
-		assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
+		switch v.method {
+		case "POST":
+			resp, respBody := testRequestPost(t, ts, v.method, "/", v.url)
+			assert.Equal(t, v.status, resp.StatusCode)
+			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
+			if v.url != "" {
+				mainMap[v.url] = respBody
+			}
+			//case "GET":
+			//	newUrl := "/"
+			//	for key, value := range mainMap {
+			//		if key == v.location {
+			//			newUrl += value
+			//		}
+			//	}
+			//
+			//	resp, _ := testRequestPost(t, ts, http.MethodGet, newUrl, "")
+			//	assert.Equal(t, v.status, resp.StatusCode)
+			//	assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
+			//	assert.Equal(t, v.contentType, resp.Header.Get("Location"))
+		}
+
 	}
 
-	//t.Run(testPost.name, func(t *testing.T) {
-	//	req := resty.New().R()
-	//	req.Method = http.MethodPost
-	//	req.URL = srv.URL
-	//	req.Body = []byte(testPost.oldUrl)
-	//
-	//	resp, err := req.Send()
-	//	if err != nil {
-	//		fmt.Println(err)
-	//	}
-	//	fmt.Println(resp.Body())
-	//
-	//	assert.Equal(t, testPost.want.contentType, resp.Header().Get("Content-Type"))
-	//	assert.Equal(t, testPost.want.statusCode, resp.StatusCode())
-	//})
-
-	//for _, tt := range tests {
-	//	switch tt.name {
-	//	case "testPost":
-	//		t.Run(tt.name, func(t *testing.T) {
-	//			body := []byte(tt.oldUrl)
-	//			request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(body))
-	//			w := httptest.NewRecorder()
-	//			h := PostPage
-	//			h(w, request)
-	//
-	//			result := w.Result()
-	//
-	//			read, err := io.ReadAll(w.Body)
-	//			if err != nil {
-	//				log.Printf("Error ReadAll %#v\n", err)
-	//			}
-	//
-	//			newUrl = string(read)
-	//
-	//			assert.Equal(t, tt.want.contentType, result.Header.Get("Content-Type"))
-	//			assert.Equal(t, tt.want.statusCode, result.StatusCode)
-	//		})
-	//	case "testGet":
-	//		t.Run(tt.name, func(t *testing.T) {
-	//
-	//			request := httptest.NewRequest(http.MethodGet, "/{id}", nil)
-	//			ctx := chi.NewRouteContext()
-	//			ctx.URLParams.Add("id", newUrl)
-	//			request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
-	//
-	//			w := httptest.NewRecorder()
-	//			h := GetPage
-	//			h(w, request)
-	//
-	//			result := w.Result()
-	//
-	//			assert.Equal(t, tt.want.location, result.Header.Get("Location"))
-	//			assert.Equal(t, tt.want.statusCode, result.StatusCode)
-	//		})
-	//
-	//	}
-	//
-	//}
 }
-
-//tests := []struct {
-//	name   string
-//	newUrl string
-//	oldUrl string
-//	want   want
-//}{
-//	{
-//		name:   "testPost",
-//		oldUrl: "https://practicum.yandex.ru/",
-//		want: want{
-//			contentType: "text/plain ",
-//			statusCode:  201,
-//		},
-//	},
-//	{
-//		name:   "testGet",
-//		oldUrl: "https://practicum.yandex.ru/",
-//		want: want{
-//			contentType: "text/plain",
-//			statusCode:  307,
-//			location:    "https://practicum.yandex.ru/",
-//		},
-//	},
-//}
