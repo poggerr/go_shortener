@@ -14,7 +14,7 @@ import (
 )
 
 var mainMap = make(map[string]string)
-var cfg = config.NewCfgForTests()
+var cfg = config.NewDefConf()
 var strg = storage.NewStorage()
 
 func testRequestPost(t *testing.T, ts *httptest.Server, method,

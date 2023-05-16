@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	cfg := config.NewCfg()
+	cfg := config.NewConf()
 	strg := storage.NewStorage()
 
 	r := routers.Router(&cfg, strg)

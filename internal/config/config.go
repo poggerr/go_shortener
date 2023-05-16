@@ -11,7 +11,8 @@ type Config struct {
 	defUrl string `env:"BASE_URL"`
 }
 
-func (cfg Config) Add() Config {
+func NewConf() Config {
+	var cfg Config
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
@@ -29,13 +30,7 @@ func (cfg Config) DefUrl() string {
 	return cfg.defUrl
 }
 
-func NewCfg() Config {
-	var cfg Config
-	cfg = cfg.Add()
-	return cfg
-}
-
-func NewCfgForTests() Config {
+func NewDefConf() Config {
 	return Config{
 		serv:   ":8080",
 		defUrl: "http://localhost:8080",
