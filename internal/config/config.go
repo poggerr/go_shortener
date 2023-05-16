@@ -2,34 +2,42 @@ package config
 
 import (
 	"flag"
-	"os"
+	"fmt"
+	"github.com/caarlos0/env/v8"
 )
 
-var serv string
-var defUrl string
+type Config struct {
+	serv   string `env:"SERVER_ADDRESS"`
+	defUrl string `env:"BASE_URL"`
+}
 
-func ParseServ() {
-
-	flag.StringVar(&serv, "a", ":8080", "write down server")
-	flag.StringVar(&defUrl, "b", "http://localhost:8080", "write down default url")
+func (cfg Config) Add() Config {
+	if err := env.Parse(&cfg); err != nil {
+		fmt.Printf("%+v\n", err)
+	}
+	flag.StringVar(&cfg.serv, "a", ":8080", "write down server")
+	flag.StringVar(&cfg.defUrl, "b", "http://localhost:8080", "write down default url")
 	flag.Parse()
-
-	if servRunAddr := os.Getenv("SERVER_ADDRESS"); servRunAddr != "" {
-		serv = servRunAddr
-	}
-	if baseRunAddr := os.Getenv("BASE_URL"); baseRunAddr != "" {
-		defUrl = baseRunAddr
-	}
-
-	if string(defUrl[len(defUrl)-1]) != "/" {
-		defUrl += "/"
-	}
+	return cfg
 }
 
-func GetServ() string {
-	return serv
+func (cfg Config) Serv() string {
+	return cfg.serv
 }
 
-func GetDefUrl() string {
-	return defUrl
+func (cfg Config) DefUrl() string {
+	return cfg.defUrl
+}
+
+func NewCfg() Config {
+	var cfg Config
+	cfg = cfg.Add()
+	return cfg
+}
+
+func NewCfgForTests() Config {
+	return Config{
+		serv:   ":8080",
+		defUrl: "http://localhost:8080",
+	}
 }
