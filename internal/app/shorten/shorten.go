@@ -16,11 +16,19 @@ func Shorting(oldUrl string, strg storage.Storage) (string, error) {
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-	ans := strg.Save(string(b), oldUrl)
-	return ans, nil
+	shortUrl := string(b)
+	_, ok := strg[shortUrl]
+	if ok {
+		return "", errors.New("Повторите запрос")
+	}
+	_, err := strg.Save(shortUrl, oldUrl)
+	if err != nil {
+		return "", err
+	}
+	return shortUrl, err
 }
 
-func UnShoring(newUrl string, strg storage.Storage) string {
-	ans := strg.OldUrl(newUrl)
-	return ans
+func UnShoring(newUrl string, strg storage.Storage) (string, error) {
+	ans, err := strg.OldUrl(newUrl)
+	return ans, err
 }

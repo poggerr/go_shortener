@@ -1,8 +1,8 @@
 package storage
 
-//type ObjStorage struct {
-//	shortUrl string
-//}
+import (
+	"errors"
+)
 
 type Storage map[string]string
 
@@ -11,25 +11,15 @@ func NewStorage() Storage {
 	return arr
 }
 
-func (strg Storage) Save(newUrl string, oldUrl string) string {
-	if strg == nil {
-		strg[oldUrl] = newUrl
-		return newUrl
-	}
-	val, ok := strg[oldUrl]
-	if ok {
-		return val
-	}
-	strg[oldUrl] = newUrl
-	return newUrl
+func (strg *Storage) Save(key, value string) (string, error) {
+	(*strg)[key] = value
+	return key, nil
 }
 
-func (strg Storage) OldUrl(newUrl string) string {
-	var ans string
-	for key, value := range strg {
-		if value == newUrl {
-			ans = key
-		}
+func (strg Storage) OldUrl(key string) (string, error) {
+	val, ok := strg[key]
+	if !ok {
+		return "", errors.New("Такой ссылки нет. Введите запрос повторно")
 	}
-	return ans
+	return val, nil
 }
