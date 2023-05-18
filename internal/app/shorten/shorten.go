@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-func Shorting(oldUrl string, strg storage.Storage) (string, error) {
+func Shorting(oldUrl string, strg *storage.Storage) (string, error) {
 	if oldUrl == "" {
 		err := errors.New("Введите ссылку")
 		return "", err
@@ -17,10 +17,6 @@ func Shorting(oldUrl string, strg storage.Storage) (string, error) {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	shortUrl := string(b)
-	_, ok := strg[shortUrl]
-	if ok {
-		return "", errors.New("Повторите запрос")
-	}
 	_, err := strg.Save(shortUrl, oldUrl)
 	if err != nil {
 		return "", err
@@ -28,7 +24,7 @@ func Shorting(oldUrl string, strg storage.Storage) (string, error) {
 	return shortUrl, err
 }
 
-func UnShoring(newUrl string, strg storage.Storage) (string, error) {
+func UnShoring(newUrl string, strg *storage.Storage) (string, error) {
 	ans, err := strg.OldUrl(newUrl)
 	return ans, err
 }

@@ -14,10 +14,10 @@ import (
 
 type App struct {
 	cfg     *config.Config
-	storage storage.Storage
+	storage *storage.Storage
 }
 
-func NewApp(cfg *config.Config, strg storage.Storage) *App {
+func NewApp(cfg *config.Config, strg *storage.Storage) *App {
 	return &App{
 		cfg:     cfg,
 		storage: strg,

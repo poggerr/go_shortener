@@ -11,6 +11,6 @@ func main() {
 	cfg := config.NewConf()
 	strg := storage.NewStorage()
 
-	r := routers.Router(&cfg, strg)
+	r := routers.Router(cfg, strg)
 	server.Server(cfg.Serv(), r)
 }

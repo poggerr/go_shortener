@@ -11,7 +11,7 @@ type Config struct {
 	defUrl string `env:"BASE_URL"`
 }
 
-func NewConf() Config {
+func NewConf() *Config {
 	var cfg Config
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
@@ -19,7 +19,7 @@ func NewConf() Config {
 	flag.StringVar(&cfg.serv, "a", ":8080", "write down server")
 	flag.StringVar(&cfg.defUrl, "b", "http://localhost:8080", "write down default url")
 	flag.Parse()
-	return cfg
+	return &cfg
 }
 
 func (cfg Config) Serv() string {

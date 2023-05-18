@@ -7,7 +7,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/config"
 )
 
-func Router(cfg *config.Config, strg storage.Storage) chi.Router {
+func Router(cfg *config.Config, strg *storage.Storage) chi.Router {
 	r := chi.NewRouter()
 	newApp := app.NewApp(cfg, strg)
 	r.Route("/", func(r chi.Router) {
