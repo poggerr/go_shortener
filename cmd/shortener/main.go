@@ -13,6 +13,6 @@ func main() {
 	strg := storage.NewStorage()
 	sugar := logger.Initialize()
 
-	r := routers.Router(cfg, strg, sugar)
+	r := routers.Router(cfg, strg)
 	server.Server(cfg.Serv(), r, sugar)
 }

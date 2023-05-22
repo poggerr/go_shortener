@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-type Sugar struct {
-	Log zap.SugaredLogger
-}
-
 var sugar zap.SugaredLogger
 
 func Initialize() *zap.SugaredLogger {
@@ -21,9 +17,6 @@ func Initialize() *zap.SugaredLogger {
 	defer logger.Sync()
 
 	sugar = *logger.Sugar()
-
-	// делаем регистратор SugaredLogger
-	//return &Sugar{Log: *logger.Sugar()}
 	return &sugar
 }
 
