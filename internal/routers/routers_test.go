@@ -71,8 +71,8 @@ func TestHandlersPost(t *testing.T) {
 		{api: "/", method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
 		{api: "/id", method: "GET", url: "https://practicum.yandex.ru/", status: 200, location: "https://practicum.yandex.ru/"},
 		{api: "/id", method: "GET", url: "https://www.google.com/", status: 200, location: "https://www.google.com/"},
-		{api: "/api/shorten", method: "POST", url: "https://practicum.yandex.ru/", contentType: "application/json", status: 200},
-		{api: "/api/shorten", method: "POST", url: "https://www.google.com/", contentType: "application/json", status: 200},
+		{api: "/api/shorten", method: "POST", url: "https://practicum.yandex.ru/", contentType: "application/json", status: 201},
+		{api: "/api/shorten", method: "POST", url: "https://www.google.com/", contentType: "application/json", status: 201},
 	}
 
 	for _, v := range testTable {

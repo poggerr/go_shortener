@@ -84,6 +84,7 @@ func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
 	}
 
 	res.Header().Set("content-type", "application/json ")
+	res.WriteHeader(http.StatusCreated)
 
 	res.Write(short)
 
