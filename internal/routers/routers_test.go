@@ -2,6 +2,7 @@ package routers
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
@@ -104,4 +105,59 @@ func TestHandlersPost(t *testing.T) {
 
 	}
 
+}
+
+func TestGzipCompression(t *testing.T) {
+	logger.Initialize()
+	ts := httptest.NewServer(Router(&cfg, strg))
+	defer ts.Close()
+
+	requestBody := `{
+        "url": "https://practicum.yandex.ru/"
+    }`
+
+	t.Run("sends_gzip", func(t *testing.T) {
+
+		buf := bytes.NewBuffer(nil)
+		zb := gzip.NewWriter(buf)
+		_, err := zb.Write([]byte(requestBody))
+		require.NoError(t, err)
+		err = zb.Close()
+		require.NoError(t, err)
+
+		r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
+		r.RequestURI = ""
+		r.Header.Set("Content-Encoding", "gzip")
+
+		resp, err := http.DefaultClient.Do(r)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		defer resp.Body.Close()
+
+		_, err = io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		//require.JSONEq(t, successBody, string(b))
+	})
+
+	//t.Run("accepts_gzip", func(t *testing.T) {
+	//	buf := bytes.NewBufferString(requestBody)
+	//	r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
+	//	r.RequestURI = ""
+	//	r.Header.Set("Accept-Encoding", "gzip")
+	//
+	//	resp, err := http.DefaultClient.Do(r)
+	//	require.NoError(t, err)
+	//	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	//
+	//	defer resp.Body.Close()
+	//
+	//	zr, err := gzip.NewReader(resp.Body)
+	//	require.NoError(t, err)
+	//
+	//	_, err = io.ReadAll(zr)
+	//	require.NoError(t, err)
+	//
+	//	//require.JSONEq(t, successBody, string(b))
+	//})
 }
