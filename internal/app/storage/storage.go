@@ -40,7 +40,7 @@ func (strg *Storage) OldUrl(key string) (string, error) {
 }
 
 func (strg *Storage) SaveToFile() {
-	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_APPEND, 0666)
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err.Error())
