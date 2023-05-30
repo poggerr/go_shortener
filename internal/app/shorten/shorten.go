@@ -17,8 +17,7 @@ func Shorting(oldUrl string, strg *storage.Storage) (string, error) {
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-	shortUrl := string(b)
-	_, err := strg.Save(shortUrl, oldUrl)
+	shortUrl, err := strg.Save(string(b), oldUrl)
 	if err != nil {
 		return "", err
 	}
