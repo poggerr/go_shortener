@@ -53,9 +53,6 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println(body)
-	fmt.Println(string(body))
-
 	short, err := shorten.Shorting(string(body), a.storage)
 
 	if err != nil {

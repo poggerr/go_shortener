@@ -114,7 +114,7 @@ func TestGzipCompression(t *testing.T) {
 	defer ts.Close()
 
 	requestBody := `{
-        "url": "http://practicum.yandex.ru/"
+        "url": "https://practicum.yandex.ru/"
     }`
 
 	t.Run("sends_gzip", func(t *testing.T) {
@@ -138,10 +138,8 @@ func TestGzipCompression(t *testing.T) {
 
 		fmt.Println(resp.Body)
 
-		b, err := io.ReadAll(resp.Body)
+		_, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		fmt.Println(string(b))
-		fmt.Println("dfdsfs")
 		//require.JSONEq(t, successBody, string(b))
 	})
 
