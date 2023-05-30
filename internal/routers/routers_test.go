@@ -113,6 +113,8 @@ func TestGzipCompression(t *testing.T) {
 	ts := httptest.NewServer(Router(&cfg, strg))
 	defer ts.Close()
 
+	fmt.Println("/")
+
 	requestBody := `{
         "url": "https://practicum.yandex.ru/"
     }`
