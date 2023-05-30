@@ -40,6 +40,6 @@ func NewDefConf() Config {
 	return Config{
 		serv:   ":8080",
 		defUrl: "http://localhost:8080",
-		path:   "/tmp/short-url-db.json",
+		path:   "/tmp/short-url-db3.json",
 	}
 }
