@@ -21,7 +21,7 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) (string, error) {
-	strg.ReadFromFile()
+	//strg.ReadFromFile()
 	_, ok := strg.data[key]
 	if ok {
 		return key, nil
@@ -32,7 +32,7 @@ func (strg *Storage) Save(key, value string) (string, error) {
 }
 
 func (strg *Storage) OldUrl(key string) (string, error) {
-	strg.ReadFromFile()
+	//strg.ReadFromFile()
 	val, ok := strg.data[key]
 	if !ok {
 		return "", errors.New("Такой ссылки нет. Введите запрос повторно")
