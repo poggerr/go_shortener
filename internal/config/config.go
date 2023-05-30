@@ -22,6 +22,11 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.defUrl, "b", "http://localhost:8080", "write down default url")
 	flag.StringVar(&cfg.path, "f", "/tmp/short-url-db3.json", "write down path to storage")
 	flag.Parse()
+
+	if !strings.Contains(cfg.path, ".json") {
+		cfg.path += ".json"
+	}
+
 	return &cfg
 }
 
@@ -34,12 +39,7 @@ func (cfg Config) DefUrl() string {
 }
 
 func (cfg Config) Path() string {
-	if strings.Contains(cfg.path, ".json") {
-		return cfg.path
-	}
-	cfg.path += ".json"
 	return cfg.path
-
 }
 
 func NewDefConf() Config {
