@@ -21,10 +21,9 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) (string, error) {
-	//strg.ReadFromFile()
 	_, ok := strg.data[key]
 	if ok {
-		return key, nil
+		return "", errors.New("Hey")
 	}
 	strg.data[key] = value
 	strg.SaveToFile()
