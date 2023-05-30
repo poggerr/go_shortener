@@ -34,10 +34,12 @@ func (cfg Config) DefUrl() string {
 }
 
 func (cfg Config) Path() string {
-	if !strings.Contains(cfg.path, ".json") {
-		cfg.path += ".json"
+	if strings.Contains(cfg.path, ".json") {
+		return cfg.path
 	}
+	cfg.path += ".json"
 	return cfg.path
+
 }
 
 func NewDefConf() Config {
