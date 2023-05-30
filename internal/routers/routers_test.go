@@ -132,7 +132,7 @@ func TestGzipCompression(t *testing.T) {
 
 		resp, err := http.DefaultClient.Do(r)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusOK, resp.StatusCode)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 		defer resp.Body.Close()
 
