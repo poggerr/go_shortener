@@ -1,10 +1,10 @@
 package storage
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -56,9 +56,8 @@ func (strg *Storage) ReadFromFile() {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	reader := bufio.NewReader(file)
 
-	data, err := reader.ReadBytes('\n')
+	data, err := io.ReadAll(file)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
