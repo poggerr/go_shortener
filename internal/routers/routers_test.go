@@ -19,7 +19,7 @@ import (
 
 var mainMap = make(map[string]string)
 var cfg = config.NewDefConf()
-var strg = storage.NewStorage()
+var strg = storage.NewStorage(cfg.Path())
 
 func testRequestPost(t *testing.T, ts *httptest.Server, method,
 	path string, oldUrl string) (*http.Response, string) {

@@ -10,7 +10,7 @@ import (
 
 func main() {
 	cfg := config.NewConf()
-	strg := storage.NewStorage()
+	strg := storage.NewStorage(cfg.Path())
 	sugar := logger.Initialize()
 
 	r := routers.Router(cfg, strg)
