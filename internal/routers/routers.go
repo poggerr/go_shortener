@@ -3,9 +3,9 @@ package routers
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
-	"github.com/poggerr/go_shortener/internal/app/gzip"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/gzip"
 	"github.com/poggerr/go_shortener/internal/logger"
 )
 
