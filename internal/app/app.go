@@ -36,7 +36,6 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
-	fmt.Println(ans)
 
 }
 

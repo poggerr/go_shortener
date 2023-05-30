@@ -41,10 +41,10 @@ func (strg *Storage) OldUrl(key string) (string, error) {
 }
 
 func (strg *Storage) SaveToFile() {
-	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_TRUNC, 0666)
 	defer file.Close()
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
 	data, err := json.Marshal(strg.data)
 	file.Write(data)
@@ -52,20 +52,19 @@ func (strg *Storage) SaveToFile() {
 
 func (strg *Storage) ReadFromFile() {
 	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
+	defer file.Close()
 	if err != nil {
-		fmt.Println(file)
+		fmt.Println(err.Error())
 	}
 	reader := bufio.NewReader(file)
 
 	data, err := reader.ReadBytes('\n')
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
 
 	err = json.Unmarshal(data, &strg.data)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println(err.Error())
 	}
-
-	fmt.Println(strg.data)
 }

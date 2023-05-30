@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -135,8 +134,6 @@ func TestGzipCompression(t *testing.T) {
 		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 		defer resp.Body.Close()
-
-		fmt.Println(resp.Body)
 
 		_, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
