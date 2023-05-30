@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -80,6 +81,7 @@ func TestHandlersPost(t *testing.T) {
 		switch v.api {
 		case "/":
 			resp, respBody := testRequestPost(t, ts, v.method, v.api, v.url)
+			fmt.Println(resp.StatusCode)
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
 			if v.url != "" {
