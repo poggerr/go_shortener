@@ -24,7 +24,7 @@ func (strg *Storage) Save(key, value string) (string, error) {
 	strg.ReadFromFile()
 	_, ok := strg.data[key]
 	if ok {
-		return "", errors.New("Повторите запрос")
+		return strg.data[key], nil
 	}
 	strg.data[key] = value
 	strg.SaveToFile()
