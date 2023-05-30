@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/caarlos0/env/v8"
+	"strings"
 )
 
 type Config struct {
@@ -33,6 +34,9 @@ func (cfg Config) DefUrl() string {
 }
 
 func (cfg Config) Path() string {
+	if !strings.Contains(cfg.path, ".json") {
+		cfg.path += ".json"
+	}
 	return cfg.path
 }
 
