@@ -11,7 +11,6 @@ import (
 func main() {
 	cfg := config.NewConf()
 	strg := storage.NewStorage(cfg.Path())
-	strg.ReadFromFile()
 	sugar := logger.Initialize()
 
 	r := routers.Router(cfg, strg)
