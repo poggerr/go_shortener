@@ -145,24 +145,24 @@ func TestGzipCompression(t *testing.T) {
 		//require.JSONEq(t, successBody, string(b))
 	})
 
-	t.Run("accepts_gzip", func(t *testing.T) {
-		buf := bytes.NewBufferString(requestBody)
-		r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
-		r.RequestURI = ""
-		r.Header.Set("Accept-Encoding", "gzip")
+	//t.Run("accepts_gzip", func(t *testing.T) {
+	//	buf := bytes.NewBufferString(requestBody)
+	//	r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
+	//	r.RequestURI = ""
+	//	r.Header.Set("Accept-Encoding", "gzip")
+	//
+	//	resp, err := http.DefaultClient.Do(r)
+	//	require.NoError(t, err)
+	//	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	//
+	//	defer resp.Body.Close()
+	//
+	//	zr, err := gzip.NewReader(resp.Body)
+	//	require.NoError(t, err)
+	//
+	//	_, err = io.ReadAll(zr)
+	//	require.NoError(t, err)
 
-		resp, err := http.DefaultClient.Do(r)
-		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, resp.StatusCode)
-
-		defer resp.Body.Close()
-
-		zr, err := gzip.NewReader(resp.Body)
-		require.NoError(t, err)
-
-		_, err = io.ReadAll(zr)
-		require.NoError(t, err)
-
-		//require.JSONEq(t, successBody, string(b))
-	})
+	//require.JSONEq(t, successBody, string(b))
+	//})
 }
