@@ -55,6 +55,8 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 	short, err := shorten.Shorting(string(body), a.storage)
 
 	if err != nil {
+		fmt.Println("Тут ошибка!")
+		fmt.Println(err.Error())
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
