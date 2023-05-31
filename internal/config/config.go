@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/caarlos0/env/v8"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -22,6 +24,14 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.defUrl, "b", "http://localhost:8080", "write down default url")
 	flag.StringVar(&cfg.path, "f", "/tmp/short-url-db.json", "write down path to storage")
 	flag.Parse()
+
+	dir, _ := path.Split(cfg.path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.Mkdir(dir, 0666)
+		if err != nil {
+			fmt.Printf(err.Error())
+		}
+	}
 
 	if !strings.Contains(cfg.path, ".json") {
 		cfg.path += ".json"
