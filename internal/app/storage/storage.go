@@ -35,7 +35,7 @@ func (strg *Storage) OldUrl(key string) (string, error) {
 	strg.ReadFromFile()
 	val, ok := strg.data[key]
 	if !ok {
-		return "", errors.New("Такой ссылки нет. Введите запрос повторно")
+		return "/", errors.New("Такой ссылки нет. Введите запрос повторно")
 	}
 	return val, nil
 }
