@@ -18,7 +18,16 @@ import (
 )
 
 var mainMap = make(map[string]string)
-var cfg = config.NewDefConf()
+
+func NewDefConf() config.Config {
+	return config.Config{
+		Serv:   ":8080",
+		DefUrl: "http://localhost:8080",
+		Path:   "/tmp/short-url-db3.json",
+	}
+}
+
+var cfg = NewDefConf()
 var strg = storage.NewStorage("/tmp/short-url-db.json")
 
 func testRequestPost(t *testing.T, ts *httptest.Server, method,

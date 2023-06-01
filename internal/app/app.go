@@ -63,7 +63,7 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 
 	res.WriteHeader(http.StatusCreated)
 
-	fmt.Fprint(res, a.cfg.DefUrl(), "/", short)
+	fmt.Fprint(res, a.cfg.DefUrl, "/", short)
 
 }
 
@@ -80,8 +80,8 @@ func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short, err2 := shorten.JsonCreater(body, a.storage, a.cfg.DefUrl())
-	if err2 != nil {
+	short, err := shorten.JsonCreater(body, a.storage, a.cfg.DefUrl)
+	if err != nil {
 		return
 	}
 

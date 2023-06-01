@@ -1,13 +1,13 @@
 package server
 
 import (
-	"go.uber.org/zap"
+	"github.com/poggerr/go_shortener/internal/logger"
 	"log"
 	"net/http"
 	"time"
 )
 
-func Server(addr string, hand http.Handler, sugar *zap.SugaredLogger) {
+func Server(addr string, hand http.Handler) {
 
 	server := &http.Server{
 		Addr:              addr,
@@ -20,7 +20,7 @@ func Server(addr string, hand http.Handler, sugar *zap.SugaredLogger) {
 		WriteTimeout:      10 * time.Second,
 	}
 
-	sugar.Info("Running server on: ", addr)
+	logger.Initialize().Info("Running server on: ", addr)
 
 	log.Fatal(server.ListenAndServe())
 }

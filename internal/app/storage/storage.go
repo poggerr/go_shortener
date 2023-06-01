@@ -21,7 +21,7 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) (string, error) {
-	strg.ReadFromFile()
+	strg.RestoreFromFile()
 	_, ok := strg.data[key]
 	if ok {
 		return "", errors.New("Hey")
@@ -32,7 +32,7 @@ func (strg *Storage) Save(key, value string) (string, error) {
 }
 
 func (strg *Storage) OldUrl(key string) (string, error) {
-	strg.ReadFromFile()
+	strg.RestoreFromFile()
 	val, ok := strg.data[key]
 	if !ok {
 		return "/", errors.New("Такой ссылки нет. Введите запрос повторно")
@@ -50,7 +50,7 @@ func (strg *Storage) SaveToFile() {
 	file.Write(data)
 }
 
-func (strg *Storage) ReadFromFile() {
+func (strg *Storage) RestoreFromFile() {
 	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
 	defer file.Close()
 	if err != nil {

@@ -3,10 +3,9 @@ package logger
 import (
 	"go.uber.org/zap"
 	"net/http"
-	"time"
 )
 
-var sugar zap.SugaredLogger
+var Log zap.SugaredLogger
 
 func Initialize() *zap.SugaredLogger {
 	logger, err := zap.NewDevelopment()
@@ -16,75 +15,29 @@ func Initialize() *zap.SugaredLogger {
 	}
 	defer logger.Sync()
 
-	sugar = *logger.Sugar()
-	return &sugar
-}
-
-func WithLoggingReq(h http.Handler) http.Handler {
-	logFn := func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		uri := r.RequestURI
-		method := r.Method
-
-		h.ServeHTTP(w, r)
-		duration := time.Since(start)
-
-		sugar.Infoln(
-			"uri", uri,
-			"method", method,
-			"duration", duration,
-		)
-
-	}
-	return http.HandlerFunc(logFn)
-}
-
-func WithLoggingRes(h http.Handler) http.Handler {
-	logFn := func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
-		responseData := &responseData{
-			status: 0,
-			size:   0,
-		}
-		lw := loggingResponseWriter{
-			ResponseWriter: w,
-			responseData:   responseData,
-		}
-		h.ServeHTTP(&lw, r)
-
-		duration := time.Since(start)
-
-		sugar.Infoln(
-			"uri", r.RequestURI,
-			"method", r.Method,
-			"status", responseData.status,
-			"duration", duration,
-			"size", responseData.size,
-		)
-	}
-	return http.HandlerFunc(logFn)
+	Log = *logger.Sugar()
+	return &Log
 }
 
 type (
-	responseData struct {
-		status int
-		size   int
+	ResponseData struct {
+		Status int
+		Size   int
 	}
 
-	loggingResponseWriter struct {
+	LoggingResponseWriter struct {
 		http.ResponseWriter
-		responseData *responseData
+		ResponseData *ResponseData
 	}
 )
 
-func (r *loggingResponseWriter) Write(b []byte) (int, error) {
+func (r *LoggingResponseWriter) Write(b []byte) (int, error) {
 	size, err := r.ResponseWriter.Write(b)
-	r.responseData.size += size
+	r.ResponseData.Size += size
 	return size, err
 }
 
-func (r *loggingResponseWriter) WriteHeader(statusCode int) {
+func (r *LoggingResponseWriter) WriteHeader(statusCode int) {
 	r.ResponseWriter.WriteHeader(statusCode)
-	r.responseData.status = statusCode
+	r.ResponseData.Status = statusCode
 }
