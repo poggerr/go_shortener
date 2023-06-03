@@ -66,23 +66,30 @@ func (strg *Storage) SaveToFile() {
 }
 
 func (strg *Storage) RestoreFromFile() {
-	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
-	defer func(file *os.File) {
-		err = file.Close()
+	_, err := os.Stat(strg.path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			os.Create(strg.path) // это_true
+		}
+	} else {
+		file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
+		defer func(file *os.File) {
+			err = file.Close()
+			if err != nil {
+				logger.Log.Error(err)
+			}
+		}(file)
 		if err != nil {
 			logger.Log.Error(err)
 		}
-	}(file)
-	if err != nil {
-		logger.Log.Error(err)
-	}
 
-	scanner := bufio.NewScanner(file)
-	scanner.Scan()
-	data := scanner.Bytes()
+		scanner := bufio.NewScanner(file)
+		scanner.Scan()
+		data := scanner.Bytes()
 
-	err = json.Unmarshal(data, &strg.data)
-	if err != nil {
-		fmt.Println(err.Error())
+		err = json.Unmarshal(data, &strg.data)
+		if err != nil {
+			logger.Initialize().Error("Ошибка при чтении файла ", err)
+		}
 	}
 }
