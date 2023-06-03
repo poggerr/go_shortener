@@ -39,7 +39,6 @@ func (strg *Storage) Save(key, value string) (string, error) {
 }
 
 func (strg *Storage) OldUrl(key string) (string, error) {
-	strg.RestoreFromFile()
 	val, ok := strg.data[key]
 	if !ok {
 		return "/", errors.New("Такой ссылки нет. Введите запрос повторно")
