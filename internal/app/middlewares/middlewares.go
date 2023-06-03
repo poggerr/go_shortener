@@ -6,29 +6,8 @@ import (
 	"time"
 )
 
-func WithLoggingReq(h http.Handler) http.Handler {
+func WithLogging(h http.Handler) http.Handler {
 	logFn := func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		uri := r.RequestURI
-		method := r.Method
-
-		h.ServeHTTP(w, r)
-		duration := time.Since(start)
-
-		logger.Log.Infoln(
-			"uri", uri,
-			"method", method,
-			"duration", duration,
-		)
-
-	}
-	return http.HandlerFunc(logFn)
-}
-
-func WithLoggingRes(h http.Handler) http.Handler {
-	logFn := func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
 		responseData := &logger.ResponseData{
 			Status: 0,
 			Size:   0,
@@ -37,9 +16,10 @@ func WithLoggingRes(h http.Handler) http.Handler {
 			ResponseWriter: w,
 			ResponseData:   responseData,
 		}
+
 		h.ServeHTTP(&lw, r)
 
-		duration := time.Since(start)
+		duration := time.Since(time.Now())
 
 		logger.Log.Infoln(
 			"uri", r.RequestURI,

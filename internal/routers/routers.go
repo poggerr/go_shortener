@@ -12,7 +12,7 @@ import (
 func Router(cfg *config.Config, strg *storage.Storage) chi.Router {
 	r := chi.NewRouter()
 	newApp := app.NewApp(cfg, strg)
-	r.Use(middlewares.WithLoggingReq, middlewares.WithLoggingRes, gzip.GzipMiddleware)
+	r.Use(middlewares.WithLogging, gzip.GzipMiddleware)
 	r.Post("/", newApp.CreateShortUrl)
 	r.Post("/api/shorten", newApp.CreateJsonShorten)
 	r.Get("/{id}", newApp.ReadOldUrl)

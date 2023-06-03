@@ -1,12 +1,20 @@
 package storage
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 )
+
+type LongUrl string
+
+type Url struct {
+	LongUrl  string `json:"longUrl"`
+	ShortUrl string `json:"shortUrl"`
+}
 
 type Storage struct {
 	data map[string]string
@@ -21,7 +29,6 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) (string, error) {
-	strg.RestoreFromFile()
 	_, ok := strg.data[key]
 	if ok {
 		return "", errors.New("Hey")
@@ -41,26 +48,37 @@ func (strg *Storage) OldUrl(key string) (string, error) {
 }
 
 func (strg *Storage) SaveToFile() {
-	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_APPEND, 0666)
+	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_TRUNC, 0666)
 	defer file.Close()
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
 	data, err := json.Marshal(strg.data)
-	file.Write(data)
+
+	data = append(data, '\n')
+
+	_, err = file.Write(data)
+	if err != nil {
+		logger.Log.Error("Ошибка при сохранении файла", err)
+	}
 }
 
 func (strg *Storage) RestoreFromFile() {
 	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
-	defer file.Close()
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			logger.Log.Error(err)
+		}
+	}(file)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Log.Error(err)
 	}
 
-	data, err := io.ReadAll(file)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	data := scanner.Bytes()
 
 	err = json.Unmarshal(data, &strg.data)
 	if err != nil {
