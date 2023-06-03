@@ -89,7 +89,7 @@ func (strg *Storage) RestoreFromFile() {
 
 		err = json.Unmarshal(data, &strg.data)
 		if err != nil {
-			logger.Initialize().Error("Ошибка при чтении файла ", err)
+			return
 		}
 	}
 }
