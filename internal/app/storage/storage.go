@@ -34,7 +34,9 @@ func (strg *Storage) Save(key, value string) (string, error) {
 		return "", errors.New("Hey")
 	}
 	strg.data[key] = value
-	strg.SaveToFile()
+	if strg.path != "" {
+		strg.SaveToFile()
+	}
 	return key, nil
 }
 

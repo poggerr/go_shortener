@@ -11,7 +11,9 @@ import (
 func main() {
 	cfg := config.NewConf()
 	strg := storage.NewStorage(cfg.Path)
-	strg.RestoreFromFile()
+	if cfg.Path != "" {
+		strg.RestoreFromFile()
+	}
 	logger.Initialize()
 
 	r := routers.Router(cfg, strg)
