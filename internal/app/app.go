@@ -33,8 +33,7 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(err.Error()))
 	}
 
-	fmt.Println(ans)
-	res.Header().Set("content-type", "text/plain; charset=utf-8")
+	res.Header().Set("content-type", "text/plain ")
 
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
