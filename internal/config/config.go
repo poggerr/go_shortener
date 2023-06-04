@@ -33,5 +33,16 @@ func NewConf() *Config {
 		}
 	}
 
+	file, err := os.OpenFile(cfg.Path, os.O_RDONLY|os.O_CREATE, 0666)
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+			logger.Log.Error(err)
+		}
+	}(file)
+	if err != nil {
+		logger.Log.Error(err)
+	}
+
 	return &cfg
 }
