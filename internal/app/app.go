@@ -6,6 +6,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/app/shorten"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/logger"
 	"io"
 	"log"
 	"net/http"
@@ -28,9 +29,9 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 	ans, err := shorten.UnShoring(id, a.storage)
 	if err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
+		fmt.Fprint(res, err.Error())
+		logger.Initialize().Info(err)
+		return
 	}
 
 	res.Header().Set("content-type", "text/plain ")
@@ -42,9 +43,8 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 
 func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 	if err := req.ParseForm(); err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
+		fmt.Fprint(res, err.Error())
+		logger.Initialize().Info(err)
 		return
 	}
 
@@ -53,13 +53,7 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short, err := shorten.Shorting(string(body), a.storage)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
+	short := shorten.Shorting(string(body), a.storage)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
