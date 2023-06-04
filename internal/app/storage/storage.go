@@ -30,10 +30,9 @@ func NewStorage(p string) *Storage {
 
 func (strg *Storage) Save(key, value string) string {
 	strg.data[key] = value
-	//if strg.path != "" {
-	//	strg.SaveToFile()
-	//}
-	strg.SaveToFile()
+	if strg.path != "" {
+		strg.SaveToFile()
+	}
 	return key
 }
 
@@ -74,11 +73,11 @@ func (strg *Storage) RestoreFromFile() {
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-			logger.Log.Error(err)
+			logger.Initialize().Error(err)
 		}
 	}(file)
 	if err != nil {
-		logger.Log.Error(err)
+		logger.Initialize().Error(err)
 	}
 
 	scanner := bufio.NewScanner(file)

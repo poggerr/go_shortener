@@ -12,10 +12,9 @@ func main() {
 	cfg := config.NewConf()
 	strg := storage.NewStorage(cfg.Path)
 	fmt.Println(cfg.Path)
-	//if cfg.Path != "" {
-	//	strg.RestoreFromFile()
-	//}
-	strg.RestoreFromFile()
+	if cfg.Path != "" {
+		strg.RestoreFromFile()
+	}
 
 	r := routers.Router(cfg, strg)
 	server.Server(cfg.Serv, r)
