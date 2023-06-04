@@ -29,10 +29,10 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) string {
-	_, ok := strg.data[key]
-	if ok {
-		return key
-	}
+	//_, ok := strg.data[key]
+	//if ok {
+	//	return key
+	//}
 	strg.data[key] = value
 	if strg.path != "" {
 		strg.SaveToFile()
