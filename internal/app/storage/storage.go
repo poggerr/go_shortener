@@ -31,7 +31,7 @@ func NewStorage(p string) *Storage {
 func (strg *Storage) Save(key, value string) string {
 	_, ok := strg.data[key]
 	if ok {
-		return value
+		return key
 	}
 	strg.data[key] = value
 	if strg.path != "" {
