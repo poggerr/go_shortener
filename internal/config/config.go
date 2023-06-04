@@ -4,9 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/caarlos0/env/v8"
-	"github.com/poggerr/go_shortener/internal/logger"
-	"os"
-	"path"
 )
 
 type Config struct {
@@ -26,24 +23,24 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.Path, "f", "", "write down path to storage")
 	flag.Parse()
 
-	dir, _ := path.Split(cfg.Path)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.Mkdir(dir, 0666)
-		if err != nil {
-			logger.Initialize().Info(err)
-		}
-	}
-
-	file, err := os.OpenFile(cfg.Path, os.O_RDONLY|os.O_CREATE, 0666)
-	defer func(file *os.File) {
-		err = file.Close()
-		if err != nil {
-			logger.Log.Error(err)
-		}
-	}(file)
-	if err != nil {
-		logger.Log.Error(err)
-	}
+	//dir, _ := path.Split(cfg.Path)
+	//if _, err := os.Stat(dir); os.IsNotExist(err) {
+	//	err = os.Mkdir(dir, 0666)
+	//	if err != nil {
+	//		logger.Initialize().Info(err)
+	//	}
+	//}
+	//
+	//file, err := os.OpenFile(cfg.Path, os.O_RDONLY|os.O_CREATE, 0666)
+	//defer func(file *os.File) {
+	//	err = file.Close()
+	//	if err != nil {
+	//		logger.Log.Error(err)
+	//	}
+	//}(file)
+	//if err != nil {
+	//	logger.Log.Error(err)
+	//}
 
 	return &cfg
 }
