@@ -20,11 +20,7 @@ func Shorting(oldUrl string, strg *storage.Storage) string {
 	}
 	shortUrl := string(b)
 
-	url, err := strg.Save(shortUrl, oldUrl)
-	if err != nil {
-		logger.Initialize().Info(err)
-		return ""
-	}
+	url := strg.Save(shortUrl, oldUrl)
 	return url
 }
 
