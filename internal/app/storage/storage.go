@@ -28,16 +28,16 @@ func NewStorage(p string) *Storage {
 	}
 }
 
-func (strg *Storage) Save(key, value string) (string, error) {
+func (strg *Storage) Save(key, value string) string {
 	_, ok := strg.data[key]
 	if ok {
-		return "", errors.New("Введите другую ссылку")
+		return value
 	}
 	strg.data[key] = value
 	if strg.path != "" {
 		strg.SaveToFile()
 	}
-	return key, nil
+	return key
 }
 
 func (strg *Storage) OldUrl(key string) (string, error) {

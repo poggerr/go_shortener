@@ -20,12 +20,12 @@ func Shorting(oldUrl string, strg *storage.Storage) string {
 	}
 	shortUrl := string(b)
 
-	_, err := strg.Save(shortUrl, oldUrl)
+	url, err := strg.Save(shortUrl, oldUrl)
 	if err != nil {
 		logger.Initialize().Info(err)
 		return ""
 	}
-	return shortUrl
+	return url
 }
 
 func UnShoring(newUrl string, strg *storage.Storage) (string, error) {
