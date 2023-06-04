@@ -53,12 +53,13 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short, _ := shorten.Shorting(string(body), a.storage)
+	short, err := shorten.Shorting(string(body), a.storage)
 
-	//if err != nil {
-	//	http.Error(res, err.Error(), http.StatusBadRequest)
-	//	return
-	//}  тут надо поправить ошибки ( когда увидишь, сильно не ругайся. Очень тяжелый день ( спешу на ревью )
+	if err != nil {
+		fmt.Println(err.Error())
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
