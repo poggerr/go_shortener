@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
+	"path"
 )
 
 type LongUrl string
@@ -29,10 +30,6 @@ func NewStorage(p string) *Storage {
 }
 
 func (strg *Storage) Save(key, value string) string {
-	//_, ok := strg.data[key]
-	//if ok {
-	//	return key
-	//}
 	strg.data[key] = value
 	if strg.path != "" {
 		strg.SaveToFile()
@@ -66,30 +63,30 @@ func (strg *Storage) SaveToFile() {
 }
 
 func (strg *Storage) RestoreFromFile() {
-	_, err := os.Stat(strg.path)
-	if err != nil {
-		if os.IsNotExist(err) {
-			os.Create(strg.path) // это_true
+	dir, _ := path.Split(strg.path)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		err = os.Mkdir(dir, 0666)
+		if err != nil {
+			logger.Initialize().Info(err)
 		}
-	} else {
-		file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
-		defer func(file *os.File) {
-			err = file.Close()
-			if err != nil {
-				logger.Log.Error(err)
-			}
-		}(file)
+	}
+	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
+	defer func(file *os.File) {
+		err = file.Close()
 		if err != nil {
 			logger.Log.Error(err)
 		}
+	}(file)
+	if err != nil {
+		logger.Log.Error(err)
+	}
 
-		scanner := bufio.NewScanner(file)
-		scanner.Scan()
-		data := scanner.Bytes()
+	scanner := bufio.NewScanner(file)
+	scanner.Scan()
+	data := scanner.Bytes()
 
-		err = json.Unmarshal(data, &strg.data)
-		if err != nil {
-			return
-		}
+	err = json.Unmarshal(data, &strg.data)
+	if err != nil {
+		return
 	}
 }
