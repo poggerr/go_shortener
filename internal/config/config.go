@@ -20,9 +20,10 @@ func NewConf() *Config {
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
+
 	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 	flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
-	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
+	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db2.json", "write down path to storage")
 	flag.Parse()
 
 	dir, _ := path.Split(cfg.Path)
