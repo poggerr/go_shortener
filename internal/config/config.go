@@ -22,7 +22,5 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
 	flag.Parse()
 
-	fmt.Println(cfg.Path)
-
 	return &cfg
 }
