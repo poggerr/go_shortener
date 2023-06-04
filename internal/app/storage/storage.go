@@ -31,9 +31,10 @@ func NewStorage(p string) *Storage {
 
 func (strg *Storage) Save(key, value string) string {
 	strg.data[key] = value
-	if strg.path != "" {
-		strg.SaveToFile()
-	}
+	//if strg.path != "" {
+	//	strg.SaveToFile()
+	//}
+	strg.SaveToFile()
 	return key
 }
 
