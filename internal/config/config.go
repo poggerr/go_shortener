@@ -23,7 +23,7 @@ func NewConf() *Config {
 
 	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 	flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
-	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db2.json", "write down path to storage")
+	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
 	flag.Parse()
 
 	dir, _ := path.Split(cfg.Path)
@@ -34,7 +34,7 @@ func NewConf() *Config {
 		}
 	}
 
-	file, err := os.OpenFile(cfg.Path, os.O_RDONLY|os.O_CREATE, 0666)
+	file, err := os.OpenFile(cfg.Path, os.O_RDONLY, 0666)
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
