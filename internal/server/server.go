@@ -20,7 +20,7 @@ func Server(addr string, hand http.Handler) {
 		WriteTimeout:      10 * time.Second,
 	}
 
-	logger.Log.Info("Running server on: ", addr)
+	logger.Initialize().Info("Running server on: ", addr)
 
 	log.Fatal(server.ListenAndServe())
 }
