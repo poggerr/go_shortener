@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
-	"path"
 )
 
 type LongUrl string
@@ -64,13 +63,13 @@ func (strg *Storage) SaveToFile() {
 }
 
 func (strg *Storage) RestoreFromFile() {
-	dir, _ := path.Split(strg.path)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.Mkdir(dir, 0666)
-		if err != nil {
-			logger.Initialize().Info(err)
-		}
-	}
+	//dir, _ := path.Split(strg.path)
+	//if _, err := os.Stat(dir); os.IsNotExist(err) {
+	//	err = os.Mkdir(dir, 0666)
+	//	if err != nil {
+	//		logger.Initialize().Info(err)
+	//	}
+	//}
 	file, err := os.OpenFile(strg.path, os.O_RDONLY|os.O_CREATE, 0666)
 	defer func(file *os.File) {
 		err = file.Close()
