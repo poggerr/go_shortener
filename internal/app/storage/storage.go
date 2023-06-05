@@ -80,6 +80,7 @@ func (strg *Storage) RestoreFromFile() {
 	if err != nil {
 		logger.Initialize().Error(err)
 	}
+	logger.Initialize().Info("file created ", strg.path)
 
 	scanner := bufio.NewScanner(file)
 	scanner.Scan()
