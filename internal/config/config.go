@@ -18,6 +18,9 @@ func NewConf() *Config {
 		fmt.Printf("%+v\n", err)
 	}
 
+	fmt.Println("H")
+	fmt.Println(cfg.Path)
+
 	if cfg.Serv == "" || cfg.DefUrl == "" || cfg.Path == "" {
 		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
