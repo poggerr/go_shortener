@@ -19,10 +19,10 @@ func NewConf() *Config {
 	}
 
 	if cfg.Serv == "" {
-		flag.StringVar(&cfg.Serv, "a", ":8081", "write down server")
+		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 	}
 	if cfg.DefUrl == "" {
-		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8081", "write down default url")
+		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
 	}
 	if cfg.Path == "" {
 		flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
