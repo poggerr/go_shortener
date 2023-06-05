@@ -58,7 +58,7 @@ func (strg *Storage) SaveToFile() {
 
 	_, err = file.Write(data)
 	if err != nil {
-		logger.Log.Error("Ошибка при сохранении файла", err)
+		logger.Log.Error("Ошибка при сохранении файла ", err)
 	}
 }
 
