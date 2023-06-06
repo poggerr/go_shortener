@@ -21,12 +21,13 @@ func NewConf() *Config {
 	if cfg.Serv == "" || cfg.DefUrl == "" {
 		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
+		flag.Parse()
 	}
 
 	if cfg.Path == "" {
 		flag.StringVar(&cfg.Path, "f", "", "write down path to storage")
+		flag.Parse()
 	}
-	flag.Parse()
 
 	return &cfg
 }
