@@ -5,6 +5,7 @@ import (
 	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
+	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
@@ -50,7 +51,7 @@ func TestMainHendler(t *testing.T) {
 				body := []byte(tt.oldUrl)
 				request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(body))
 				w := httptest.NewRecorder()
-				h := postPage
+				h := handlers.PostPage
 				h(w, request)
 
 				result := w.Result()
@@ -72,7 +73,7 @@ func TestMainHendler(t *testing.T) {
 				request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
 
 				w := httptest.NewRecorder()
-				h := getPage
+				h := handlers.GetPage
 				h(w, request)
 
 				result := w.Result()
