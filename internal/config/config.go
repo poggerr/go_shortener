@@ -18,8 +18,11 @@ func NewConf() *Config {
 		fmt.Printf("%+v\n", err)
 	}
 
-	if cfg.Serv == "" || cfg.DefUrl == "" {
+	if cfg.Serv == "" {
 		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
+	}
+
+	if cfg.DefUrl == "" {
 		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
 	}
 
