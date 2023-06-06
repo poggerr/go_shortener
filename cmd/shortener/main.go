@@ -1,52 +1,40 @@
 package main
 
 import (
-	"fmt"
+	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
 	"io"
+	"log"
 	"net/http"
-	"strings"
 )
 
 func main() {
-	mux := http.NewServeMux()
-	//mux.HandleFunc(`/`, postPage)
-	//router.HandleFunc(`/{id}`, getPage)
-	mux.HandleFunc("/", mainHendler)
-	err := http.ListenAndServe(":8080", mux)
-	if err != nil {
-		fmt.Println(err)
-	}
+	r := chi.NewRouter()
+	r.Route("/", func(r chi.Router) {
+		r.Post("/", postPage)
+		r.Get("/{id}", getPage)
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func mainHendler(res http.ResponseWriter, req *http.Request) {
-	switch req.Method {
-	case "POST":
-		postPage(res, req)
-	case "GET":
-		id := req.URL.Path
-		getPage(res, id)
+func getPage(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(res, "Only GET requests are allowed!", http.StatusBadRequest)
+		return
 	}
-
-}
-
-func getPage(res http.ResponseWriter, id string) {
-	//if req.Method != http.MethodGet {
-	//	http.Error(res, "Only GET requests are allowed!", http.StatusBadRequest)
-	//	return
-	//}
-	s := strings.Split(id, "/")
-	ans := app.UnShorting(s[1])
+	id := chi.URLParam(req, "id")
+	ans := app.UnShorting(id)
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
 
 }
 
 func postPage(res http.ResponseWriter, req *http.Request) {
-	//if req.Method != http.MethodPost {
-	//	http.Error(res, "Only Post requests are allowed!", http.StatusBadRequest)
-	//	return
-	//}
+	if req.Method != http.MethodPost {
+		http.Error(res, "Only Post requests are allowed!", http.StatusBadRequest)
+		return
+	}
 
 	if err := req.ParseForm(); err != nil {
 		res.Write([]byte(err.Error()))

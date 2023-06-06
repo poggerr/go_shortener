@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"context"
+	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
 	"github.com/stretchr/testify/assert"
 	"net/http"
@@ -48,7 +50,7 @@ func TestMainHendler(t *testing.T) {
 				body := []byte(tt.oldUrl)
 				request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer(body))
 				w := httptest.NewRecorder()
-				h := mainHendler
+				h := postPage
 				h(w, request)
 
 				result := w.Result()
@@ -58,11 +60,19 @@ func TestMainHendler(t *testing.T) {
 			})
 		case "testGet":
 			t.Run(tt.name, func(t *testing.T) {
-				tt.newUrl = app.Shorting(tt.oldUrl)
-				target := "/" + tt.newUrl
-				request := httptest.NewRequest(http.MethodGet, target, nil)
+				var target string
+				for key, value := range app.MainMap {
+					if value == tt.oldUrl {
+						target = key
+					}
+				}
+				request := httptest.NewRequest(http.MethodGet, "/{id}", nil)
+				ctx := chi.NewRouteContext()
+				ctx.URLParams.Add("id", target)
+				request = request.WithContext(context.WithValue(request.Context(), chi.RouteCtxKey, ctx))
+
 				w := httptest.NewRecorder()
-				h := mainHendler
+				h := getPage
 				h(w, request)
 
 				result := w.Result()
