@@ -14,23 +14,15 @@ type Config struct {
 
 func NewConf() *Config {
 	var cfg Config
+
+	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
+	flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
+	flag.StringVar(&cfg.Path, "f", "", "write down path to storage")
+	flag.Parse()
+
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
-
-	if cfg.Serv == "" {
-		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
-	}
-
-	if cfg.DefUrl == "" {
-		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
-	}
-
-	if cfg.Path == "" {
-		flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
-	}
-
-	flag.Parse()
 
 	return &cfg
 }
