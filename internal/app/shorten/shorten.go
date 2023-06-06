@@ -10,7 +10,6 @@ import (
 func Shorting(oldUrl string, strg *storage.Storage) string {
 	if oldUrl == "" {
 		logger.Initialize().Error("Введите ссылку")
-		//err := errors.New("Введите ссылку")
 		return ""
 	}
 	letterBytes := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"

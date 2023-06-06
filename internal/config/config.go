@@ -18,16 +18,17 @@ func NewConf() *Config {
 		fmt.Printf("%+v\n", err)
 	}
 
-	fmt.Println("H")
-	fmt.Println(cfg.Path)
-
-	if cfg.Serv == "" || cfg.DefUrl == "" || cfg.Path == "" {
+	if cfg.Serv == "" {
 		flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
-		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
-		flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
-		fmt.Println(cfg.Path)
-		flag.Parse()
 	}
+	if cfg.DefUrl == "" {
+		flag.StringVar(&cfg.DefUrl, "b", "http://localhost:8080", "write down default url")
+	}
+	if cfg.Path == "" {
+		flag.StringVar(&cfg.Path, "f", "", "write down path to storage")
+		fmt.Println(cfg.Path)
+	}
+	flag.Parse()
 
 	return &cfg
 }
