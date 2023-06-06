@@ -1,19 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"github.com/poggerr/go_shortener/config/flags"
+	"github.com/poggerr/go_shortener/internal/app/storage"
+	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/routers"
-	"log"
-	"net/http"
+	"github.com/poggerr/go_shortener/internal/server"
 )
 
 func main() {
-	flags.ParseFlags()
+	cfg := config.NewConf()
+	strg := storage.NewStorage()
 
-	r := routers.Routers()
-
-	fmt.Println("Running server on", flags.Serv)
-
-	log.Fatal(http.ListenAndServe(flags.Serv, r))
+	r := routers.Router(cfg, strg)
+	server.Server(cfg.Serv(), r)
 }
