@@ -6,7 +6,7 @@ import (
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-var mainMap = make(map[string]string)
+var MainMap = make(map[string]string)
 
 func Shorting(oldUrl string) string {
 	b := make([]byte, 8)
@@ -14,13 +14,13 @@ func Shorting(oldUrl string) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 
-	mainMap[string(b)] = oldUrl
+	MainMap[string(b)] = oldUrl
 
 	return string(b)
 }
 
 func UnShorting(newUrl string) string {
-	count, ok := mainMap[newUrl]
+	count, ok := MainMap[newUrl]
 	if ok {
 		return count
 	}
