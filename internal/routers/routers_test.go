@@ -108,12 +108,7 @@ func TestHandlersPost(t *testing.T) {
 			assert.Equal(t, v.contentType, resp.Header.Get("Location"))
 		case "/api/shorten":
 			resp, _ := testRequestJSON(t, ts, v.method, v.api, v.url)
-			defer func(Body io.ReadCloser) {
-				err := Body.Close()
-				if err != nil {
-					logger.Initialize().Info(err)
-				}
-			}(resp.Body)
+			defer resp.Body.Close()
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
 		}
