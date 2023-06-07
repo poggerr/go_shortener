@@ -12,9 +12,9 @@ import (
 
 type LongUrl string
 
-type Url struct {
-	LongUrl  string `json:"longUrl"`
-	ShortUrl string `json:"shortUrl"`
+type URL struct {
+	LongURL  string `json:"longUrl"`
+	ShortURL string `json:"shortUrl"`
 }
 
 type Storage struct {
@@ -37,22 +37,27 @@ func (strg *Storage) Save(key, value string) string {
 	return key
 }
 
-func (strg *Storage) OldUrl(key string) (string, error) {
+func (strg *Storage) LongURL(key string) (string, error) {
 	val, ok := strg.data[key]
 	if !ok {
-		return "/", errors.New("Такой ссылки нет. Введите запрос повторно")
+		return "/", errors.New("такой ссылки нет. Введите запрос повторно")
 	}
 	return val, nil
 }
 
 func (strg *Storage) SaveToFile() {
 	file, err := os.OpenFile(strg.path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
-	defer file.Close()
+	defer func(file *os.File) {
+		err = file.Close()
+		if err != nil {
+
+		}
+	}(file)
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 
-	data, err := json.Marshal(strg.data)
+	data, _ := json.Marshal(strg.data)
 
 	data = append(data, '\n')
 

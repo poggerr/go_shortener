@@ -24,7 +24,7 @@ func NewApp(cfg *config.Config, strg *storage.Storage) *App {
 	}
 }
 
-func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
+func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 	ans, err := shorten.UnShoring(id, a.storage)
 	if err != nil {
@@ -40,7 +40,7 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
+func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
@@ -52,34 +52,34 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 
 	res.WriteHeader(http.StatusCreated)
 
-	fmt.Fprint(res, a.cfg.DefUrl, "/", short)
+	fmt.Fprint(res, a.cfg.DefURL, "/", short)
 
 }
 
-type Url struct {
-	LongUrl  string `json:"url"`
-	ShortUrl string `json:"result"`
+type URL struct {
+	LongURL  string `json:"url"`
+	ShortURL string `json:"result"`
 }
 
-func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
+func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	var url Url
+	var url URL
 
 	err = json.Unmarshal(body, &url)
 	if err != nil {
 		logger.Initialize().Info(err)
 	}
 
-	shortUrl := shorten.Shorting(url.LongUrl, a.storage)
+	shortURL := shorten.Shorting(url.LongURL, a.storage)
 	shortenMap := make(map[string]string)
 
-	shortUrl = a.cfg.DefUrl + "/" + shortUrl
+	shortURL = a.cfg.DefURL + "/" + shortURL
 
-	shortenMap["result"] = shortUrl
+	shortenMap["result"] = shortURL
 
 	marshal, err := json.Marshal(shortenMap)
 	if err != nil {

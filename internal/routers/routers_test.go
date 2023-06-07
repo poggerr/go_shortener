@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
-	"fmt"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -22,7 +21,7 @@ var mainMap = make(map[string]string)
 func NewDefConf() config.Config {
 	return config.Config{
 		Serv:   ":8080",
-		DefUrl: "http://localhost:8080",
+		DefURL: "http://localhost:8080",
 		Path:   "/tmp/short-url-db3.json",
 	}
 }
@@ -31,9 +30,9 @@ var cfg = NewDefConf()
 var strg = storage.NewStorage("/tmp/short-url-db.json")
 
 func testRequestPost(t *testing.T, ts *httptest.Server, method,
-	path string, oldUrl string) (*http.Response, string) {
+	path string, oldURL string) (*http.Response, string) {
 
-	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer([]byte(oldUrl)))
+	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer([]byte(oldURL)))
 	require.NoError(t, err)
 
 	resp, err := ts.Client().Do(req)
@@ -46,10 +45,10 @@ func testRequestPost(t *testing.T, ts *httptest.Server, method,
 	return resp, string(respBody)
 }
 
-func testRequestJson(t *testing.T, ts *httptest.Server, method, path string, longUrl string) (*http.Response, string) {
-	longUrlMap := make(map[string]string)
-	longUrlMap["url"] = longUrl
-	marshal, _ := json.Marshal(longUrlMap)
+func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, longURL string) (*http.Response, string) {
+	longURLMap := make(map[string]string)
+	longURLMap["url"] = longURL
+	marshal, _ := json.Marshal(longURLMap)
 
 	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer(marshal))
 	require.NoError(t, err)
@@ -90,7 +89,6 @@ func TestHandlersPost(t *testing.T) {
 		switch v.api {
 		case "/":
 			resp, respBody := testRequestPost(t, ts, v.method, v.api, v.url)
-			fmt.Println(resp.StatusCode)
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
 			if v.url != "" {
@@ -99,17 +97,17 @@ func TestHandlersPost(t *testing.T) {
 				mainMap[v.url] = m[3]
 			}
 		case "/id":
-			newUrl := "/"
+			newURL := "/"
 			for key, value := range mainMap {
 				if key == v.location {
-					newUrl += value
+					newURL += value
 				}
 			}
-			resp, _ := testRequestPost(t, ts, http.MethodGet, newUrl, "")
+			resp, _ := testRequestPost(t, ts, http.MethodGet, newURL, "")
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Location"))
 		case "/api/shorten":
-			resp, _ := testRequestJson(t, ts, v.method, v.api, v.url)
+			resp, _ := testRequestJSON(t, ts, v.method, v.api, v.url)
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
 		}

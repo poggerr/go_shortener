@@ -6,8 +6,8 @@ import (
 	"math/rand"
 )
 
-func Shorting(oldUrl string, strg *storage.Storage) string {
-	if oldUrl == "" {
+func Shorting(longURL string, strg *storage.Storage) string {
+	if longURL == "" {
 		logger.Initialize().Error("Введите ссылку")
 		return ""
 	}
@@ -16,13 +16,13 @@ func Shorting(oldUrl string, strg *storage.Storage) string {
 	for i := range b {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
-	shortUrl := string(b)
+	shortURL := string(b)
 
-	url := strg.Save(shortUrl, oldUrl)
+	url := strg.Save(shortURL, longURL)
 	return url
 }
 
-func UnShoring(newUrl string, strg *storage.Storage) (string, error) {
-	ans, err := strg.OldUrl(newUrl)
+func UnShoring(shortURL string, strg *storage.Storage) (string, error) {
+	ans, err := strg.LongURL(shortURL)
 	return ans, err
 }
