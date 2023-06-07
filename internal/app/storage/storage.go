@@ -4,13 +4,10 @@ import (
 	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 	"path"
 )
-
-type LongUrl string
 
 type URL struct {
 	LongURL  string `json:"longUrl"`
@@ -50,11 +47,11 @@ func (strg *Storage) SaveToFile() {
 	defer func(file *os.File) {
 		err = file.Close()
 		if err != nil {
-
+			logger.Initialize().Error(err)
 		}
 	}(file)
 	if err != nil {
-		fmt.Println(err.Error())
+		logger.Initialize().Error(err)
 	}
 
 	data, _ := json.Marshal(strg.data)

@@ -37,7 +37,12 @@ func testRequestPost(t *testing.T, ts *httptest.Server, method,
 
 	resp, err := ts.Client().Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			logger.Initialize().Info(err)
+		}
+	}(resp.Body)
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
@@ -55,7 +60,12 @@ func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, lon
 
 	resp, err := ts.Client().Do(req)
 	require.NoError(t, err)
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err = Body.Close()
+		if err != nil {
+			logger.Initialize().Info(err)
+		}
+	}(resp.Body)
 
 	respBody, err := io.ReadAll(resp.Body)
 	require.NoError(t, err)
