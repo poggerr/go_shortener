@@ -1,6 +1,7 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app/shorten"
@@ -8,9 +9,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"io"
-	"log"
 	"net/http"
-	"os"
 )
 
 type App struct {
@@ -42,12 +41,6 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
-	if err := req.ParseForm(); err != nil {
-		fmt.Fprint(res, err.Error())
-		logger.Initialize().Info(err)
-		return
-	}
-
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
@@ -63,27 +56,39 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
-	if err := req.ParseForm(); err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
-		return
-	}
+type Url struct {
+	LongUrl  string `json:"url"`
+	ShortUrl string `json:"result"`
+}
 
+func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	short, err := shorten.JsonCreater(body, a.storage, a.cfg.DefUrl)
+	var url Url
+
+	err = json.Unmarshal(body, &url)
 	if err != nil {
-		return
+		logger.Initialize().Info(err)
+	}
+
+	shortUrl := shorten.Shorting(url.LongUrl, a.storage)
+	shortenMap := make(map[string]string)
+
+	shortUrl = a.cfg.DefUrl + "/" + shortUrl
+
+	shortenMap["result"] = shortUrl
+
+	marshal, err := json.Marshal(shortenMap)
+	if err != nil {
+		logger.Initialize().Info(err)
 	}
 
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusCreated)
 
-	res.Write(short)
+	res.Write(marshal)
 
 }

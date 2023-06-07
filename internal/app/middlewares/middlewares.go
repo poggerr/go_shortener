@@ -8,10 +8,7 @@ import (
 
 func WithLogging(h http.Handler) http.Handler {
 	logFn := func(w http.ResponseWriter, r *http.Request) {
-		responseData := &logger.ResponseData{
-			Status: 0,
-			Size:   0,
-		}
+		responseData := &logger.ResponseData{}
 		lw := logger.LoggingResponseWriter{
 			ResponseWriter: w,
 			ResponseData:   responseData,
