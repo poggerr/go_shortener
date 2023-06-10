@@ -32,8 +32,11 @@ func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
 		fmt.Println(err.Error())
 		res.Write([]byte(err.Error()))
 	}
+	res.Header().Set("content-type", "text/plain; charset=utf-8")
+
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
+	fmt.Println(ans)
 
 }
 
@@ -57,7 +60,7 @@ func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res.Header().Set("content-type", "text/plain ")
+	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
 	res.WriteHeader(http.StatusCreated)
 

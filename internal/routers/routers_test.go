@@ -2,7 +2,9 @@ package routers
 
 import (
 	"bytes"
+	"compress/gzip"
 	"encoding/json"
+	"fmt"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -66,8 +68,8 @@ func TestHandlersPost(t *testing.T) {
 		status      int
 		location    string
 	}{
-		{api: "/", method: "POST", url: "https://practicum.yandex.ru/", contentType: "text/plain", status: 201},
-		{api: "/", method: "POST", url: "https://www.google.com/", contentType: "text/plain", status: 201},
+		{api: "/", method: "POST", url: "https://practicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 201},
+		{api: "/", method: "POST", url: "https://www.google.com/", contentType: "text/plain; charset=utf-8", status: 201},
 		{api: "/", method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
 		{api: "/id", method: "GET", url: "https://practicum.yandex.ru/", status: 200, location: "https://practicum.yandex.ru/"},
 		{api: "/id", method: "GET", url: "https://www.google.com/", status: 200, location: "https://www.google.com/"},
@@ -104,4 +106,63 @@ func TestHandlersPost(t *testing.T) {
 
 	}
 
+}
+
+func TestGzipCompression(t *testing.T) {
+	logger.Initialize()
+	ts := httptest.NewServer(Router(&cfg, strg))
+	defer ts.Close()
+
+	fmt.Println("/")
+
+	requestBody := `{
+        "url": "https://practicum.yandex.ru/"
+    }`
+
+	t.Run("sends_gzip", func(t *testing.T) {
+
+		buf := bytes.NewBuffer(nil)
+		zb := gzip.NewWriter(buf)
+		_, err := zb.Write([]byte(requestBody))
+		require.NoError(t, err)
+		err = zb.Close()
+		require.NoError(t, err)
+
+		r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
+		r.RequestURI = ""
+		r.Header.Set("Content-Encoding", "gzip")
+
+		resp, err := http.DefaultClient.Do(r)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
+
+		defer resp.Body.Close()
+
+		fmt.Println(resp.Body)
+
+		_, err = io.ReadAll(resp.Body)
+		require.NoError(t, err)
+		//require.JSONEq(t, successBody, string(b))
+	})
+
+	//t.Run("accepts_gzip", func(t *testing.T) {
+	//	buf := bytes.NewBufferString(requestBody)
+	//	r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
+	//	r.RequestURI = ""
+	//	r.Header.Set("Accept-Encoding", "gzip")
+	//
+	//	resp, err := http.DefaultClient.Do(r)
+	//	require.NoError(t, err)
+	//	require.Equal(t, http.StatusCreated, resp.StatusCode)
+	//
+	//	defer resp.Body.Close()
+	//
+	//	zr, err := gzip.NewReader(resp.Body)
+	//	require.NoError(t, err)
+	//
+	//	_, err = io.ReadAll(zr)
+	//	require.NoError(t, err)
+
+	//require.JSONEq(t, successBody, string(b))
+	//})
 }
