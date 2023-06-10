@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"io"
@@ -34,6 +35,7 @@ func testRequestPost(t *testing.T, ts *httptest.Server, method,
 }
 
 func TestHandlersPost(t *testing.T) {
+	logger.Initialize()
 	ts := httptest.NewServer(Router(&cfg, strg))
 	defer ts.Close()
 

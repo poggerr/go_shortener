@@ -1,13 +1,13 @@
 package server
 
 import (
-	"fmt"
+	"go.uber.org/zap"
 	"log"
 	"net/http"
 	"time"
 )
 
-func Server(addr string, hand http.Handler) {
+func Server(addr string, hand http.Handler, sugar *zap.SugaredLogger) {
 
 	server := &http.Server{
 		Addr:              addr,
@@ -20,7 +20,7 @@ func Server(addr string, hand http.Handler) {
 		WriteTimeout:      10 * time.Second,
 	}
 
-	fmt.Println("Running server on", addr)
+	sugar.Info("Running server on: ", addr)
 
 	log.Fatal(server.ListenAndServe())
 }
