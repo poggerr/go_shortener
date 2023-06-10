@@ -1,15 +1,15 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app/shorten"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/logger"
 	"io"
-	"log"
 	"net/http"
-	"os"
 )
 
 type App struct {
@@ -24,71 +24,71 @@ func NewApp(cfg *config.Config, strg *storage.Storage) *App {
 	}
 }
 
-func (a *App) ReadOldUrl(res http.ResponseWriter, req *http.Request) {
+func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
 	ans, err := shorten.UnShoring(id, a.storage)
 	if err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
-	}
-	res.Header().Set("content-type", "text/plain; charset=utf-8")
-
-	res.Header().Set("Location", ans)
-	res.WriteHeader(307)
-	fmt.Println(ans)
-
-}
-
-func (a *App) CreateShortUrl(res http.ResponseWriter, req *http.Request) {
-	if err := req.ParseForm(); err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
+		fmt.Fprint(res, err.Error())
+		logger.Initialize().Info(err)
 		return
 	}
 
+	res.Header().Set("content-type", "text/plain ")
+
+	res.Header().Set("Location", ans)
+	res.WriteHeader(307)
+
+}
+
+func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	short, err := shorten.Shorting(string(body), a.storage)
-
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
+	short := shorten.Shorting(string(body), a.storage)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
 	res.WriteHeader(http.StatusCreated)
 
-	fmt.Fprint(res, a.cfg.DefUrl(), "/", short)
+	fmt.Fprint(res, a.cfg.DefURL, "/", short)
 
 }
 
-func (a *App) CreateJsonShorten(res http.ResponseWriter, req *http.Request) {
-	if err := req.ParseForm(); err != nil {
-		log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
-		fmt.Println(err.Error())
-		res.Write([]byte(err.Error()))
-		return
-	}
+type URL struct {
+	LongURL  string `json:"url"`
+	ShortURL string `json:"result"`
+}
 
+func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	short, err2 := shorten.JsonCreater(body, a.storage, a.cfg.DefUrl())
-	if err2 != nil {
-		return
+	var url URL
+
+	err = json.Unmarshal(body, &url)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	shortURL := shorten.Shorting(url.LongURL, a.storage)
+	shortenMap := make(map[string]string)
+
+	shortURL = a.cfg.DefURL + "/" + shortURL
+
+	shortenMap["result"] = shortURL
+
+	marshal, err := json.Marshal(shortenMap)
+	if err != nil {
+		logger.Initialize().Info(err)
 	}
 
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusCreated)
 
-	res.Write(short)
+	res.Write(marshal)
 
 }

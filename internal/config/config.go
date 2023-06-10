@@ -7,32 +7,22 @@ import (
 )
 
 type Config struct {
-	serv   string `env:"SERVER_ADDRESS"`
-	defUrl string `env:"BASE_URL"`
+	Serv   string `env:"SERVER_ADDRESS"`
+	DefURL string `env:"BASE_URL"`
+	Path   string `env:"FILE_STORAGE_PATH"`
 }
 
 func NewConf() *Config {
 	var cfg Config
+
+	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
+	flag.StringVar(&cfg.DefURL, "b", "http://localhost:8080", "write down default url")
+	flag.StringVar(&cfg.Path, "f", "", "write down path to storage")
+	flag.Parse()
+
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
-	flag.StringVar(&cfg.serv, "a", ":8080", "write down server")
-	flag.StringVar(&cfg.defUrl, "b", "http://localhost:8080", "write down default url")
-	flag.Parse()
+
 	return &cfg
-}
-
-func (cfg Config) Serv() string {
-	return cfg.serv
-}
-
-func (cfg Config) DefUrl() string {
-	return cfg.defUrl
-}
-
-func NewDefConf() Config {
-	return Config{
-		serv:   ":8080",
-		defUrl: "http://localhost:8080",
-	}
 }
