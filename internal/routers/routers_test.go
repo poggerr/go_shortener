@@ -3,7 +3,10 @@ package routers
 import (
 	"bytes"
 	"compress/gzip"
+	"database/sql"
 	"encoding/json"
+	"fmt"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -23,6 +26,7 @@ func NewDefConf() config.Config {
 		Serv:   ":8080",
 		DefURL: "http://localhost:8080",
 		Path:   "/tmp/short-url-db3.json",
+		DB:     "host=localhost user=username password=userpassword dbname=shortener sslmode=disable",
 	}
 }
 
@@ -63,7 +67,12 @@ func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, lon
 
 func TestHandlersPost(t *testing.T) {
 	logger.Initialize()
-	ts := httptest.NewServer(Router(&cfg, strg))
+	db, err := sql.Open("pgx", cfg.DB)
+	if err != nil {
+		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	}
+	defer db.Close()
+	ts := httptest.NewServer(Router(&cfg, strg, db))
 	defer ts.Close()
 
 	var testTable = []struct {
@@ -119,7 +128,12 @@ func TestHandlersPost(t *testing.T) {
 
 func TestGzipCompression(t *testing.T) {
 	logger.Initialize()
-	ts := httptest.NewServer(Router(&cfg, strg))
+	db, err := sql.Open("pgx", cfg.DB)
+	if err != nil {
+		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	}
+	defer db.Close()
+	ts := httptest.NewServer(Router(&cfg, strg, db))
 	defer ts.Close()
 
 	fmt.Println("/")
