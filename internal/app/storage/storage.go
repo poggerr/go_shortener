@@ -21,14 +21,14 @@ type URL struct {
 type Storage struct {
 	data map[string]string
 	path string
-	db   *sql.DB
+	DB   *sql.DB
 }
 
 func NewStorage(p string, db *sql.DB) *Storage {
 	return &Storage{
 		data: make(map[string]string),
 		path: p,
-		db:   db,
+		DB:   db,
 	}
 }
 
@@ -106,7 +106,7 @@ func (strg *Storage) RestoreDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := strg.db.ExecContext(ctx, `
+	_, err := strg.DB.ExecContext(ctx, `
 	CREATE TABLE IF NOT EXISTS urls (
 		"longurl" TEXT,
 		"shorturl" TEXT
@@ -124,7 +124,7 @@ func (strg *Storage) SaveToDB(longurl, shorturl string) {
 
 	query := fmt.Sprintf("INSERT INTO urls (longurl, shorturl) VALUES ('%s', '%s')", longurl, shorturl)
 
-	_, err := strg.db.ExecContext(ctx, query)
+	_, err := strg.DB.ExecContext(ctx, query)
 	if err != nil {
 		logger.Initialize().Info("Ошибка при записи в urls ", err)
 	}
