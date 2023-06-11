@@ -18,10 +18,9 @@ func main() {
 		logger.Initialize().Error("Ошибка при подключении к БД ", err)
 	}
 	defer db.Close()
+	strg := storage.NewStorage(cfg.Path, db)
+	strg.RestoreDB()
 
-	storage.RestoreDB(db)
-
-	strg := storage.NewStorage(cfg.Path)
 	if cfg.Path != "" {
 		strg.RestoreFromFile()
 	}
