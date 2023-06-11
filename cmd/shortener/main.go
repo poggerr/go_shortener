@@ -19,6 +19,8 @@ func main() {
 	}
 	defer db.Close()
 
+	storage.RestoreDB(db)
+
 	strg := storage.NewStorage(cfg.Path)
 	if cfg.Path != "" {
 		strg.RestoreFromFile()

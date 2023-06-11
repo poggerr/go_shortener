@@ -2,11 +2,14 @@ package storage
 
 import (
 	"bufio"
+	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 	"path"
+	"time"
 )
 
 type URL struct {
@@ -91,4 +94,21 @@ func (strg *Storage) RestoreFromFile() {
 	if err != nil {
 		logger.Initialize().Info("Ошибка при unmarshal ", err)
 	}
+}
+
+func RestoreDB(db *sql.DB) {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := db.ExecContext(ctx, `
+	CREATE TABLE IF NOT EXISTS urls (
+		"id" INTEGER PRIMARY KEY,
+		"longurl" VARCHAR(250) NOT NULL DEFAULT '',
+		"shorturl" VARCHAR(250) NOT NULL DEFAULT ''
+	)
+	`)
+	if err != nil {
+		logger.Initialize().Info("Ошибка при создании таблицы urls ", err)
+	}
+
 }
