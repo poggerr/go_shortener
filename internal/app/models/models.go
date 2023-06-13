@@ -1,9 +1,9 @@
 package models
 
 type BatchList []struct {
-	CorrelationId string `json:"correlation_id"`
-	OriginalUrl   string `json:"original_url"`
-	ShortUrl      string `json:"short_url"`
+	CorrelationID string `json:"correlation_id"`
+	OriginalURL   string `json:"original_url"`
+	ShortURL      string `json:"short_url"`
 }
 
 //type BatchListRes []struct {
