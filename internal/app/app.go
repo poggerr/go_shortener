@@ -32,7 +32,7 @@ func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB) *App {
 
 func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	ans, err := service.UnShoring(id, a.storage)
+	ans, err := service.ServiceTake(id, a.storage)
 	if err != nil {
 		fmt.Fprint(res, err.Error())
 		logger.Initialize().Info(err)
@@ -52,13 +52,13 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short := service.Shorting(string(body), a.storage)
+	short := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
 	res.WriteHeader(http.StatusCreated)
 
-	fmt.Fprint(res, a.cfg.DefURL, "/", short)
+	res.Write([]byte(short))
 
 }
 
@@ -75,10 +75,8 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL := service.Shorting(url.LongURL, a.storage)
+	shortURL := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage)
 	shortenMap := make(map[string]string)
-
-	shortURL = a.cfg.DefURL + "/" + shortURL
 
 	shortenMap["result"] = shortURL
 
@@ -112,20 +110,18 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 	}
 
 	err = json.Unmarshal(body, &list)
-
-	fmt.Println(list)
 	if err != nil {
 		logger.Initialize().Info(err)
 	}
 
-	list = service.SaveMultipleToDB(list, a.storage)
+	list = service.SaveMultipleToDB(list, a.storage, a.cfg.DefURL)
 
 	marshal, err := json.Marshal(list)
 	if err != nil {
 		logger.Initialize().Info("Ошибка при формировании ответа ", err)
 	}
 
-	res.WriteHeader(http.StatusOK)
+	res.WriteHeader(http.StatusCreated)
 	res.Write(marshal)
 
 }

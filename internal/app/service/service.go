@@ -10,7 +10,27 @@ import (
 	"time"
 )
 
-func Shorting(longURL string, strg *storage.Storage) string {
+func ServiceCreate(longURL, defURL string, strg *storage.Storage) string {
+	shortURL := Shorting(longURL)
+	strg.Save(shortURL, longURL)
+	shortURL = defURL + "/" + shortURL
+	strg.SaveToDB(longURL, shortURL)
+	return shortURL
+}
+
+func ServiceCreateBatch(longURL, defURL string, strg *storage.Storage) string {
+	shortURL := Shorting(longURL)
+	strg.Save(shortURL, longURL)
+	shortURL = defURL + "/" + shortURL
+	return shortURL
+}
+
+func ServiceTake(shortURL string, strg *storage.Storage) (string, error) {
+	ans, err := strg.LongURL(shortURL)
+	return ans, err
+}
+
+func Shorting(longURL string) string {
 	if longURL == "" {
 		logger.Initialize().Error("Введите ссылку")
 		return ""
@@ -21,17 +41,10 @@ func Shorting(longURL string, strg *storage.Storage) string {
 		b[i] = letterBytes[rand.Intn(len(letterBytes))]
 	}
 	shortURL := string(b)
-
-	url := strg.Save(shortURL, longURL)
-	return url
+	return shortURL
 }
 
-func UnShoring(shortURL string, strg *storage.Storage) (string, error) {
-	ans, err := strg.LongURL(shortURL)
-	return ans, err
-}
-
-func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.BatchList {
+func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL string) models.BatchList {
 	tx, err := strg.DB.Begin()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -39,7 +52,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.Batch
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortUrl := Shorting(v.OriginalUrl, strg)
+		shortUrl := ServiceCreateBatch(v.OriginalUrl, defURL, strg)
 		list[i].ShortUrl = shortUrl
 		query := fmt.Sprintf("INSERT INTO urls (correlation_id, longurl, shorturl) VALUES('%s', '%s', '%s')", v.CorrelationId, v.OriginalUrl, shortUrl)
 		_, err = tx.ExecContext(ctx, query)
@@ -49,8 +62,6 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.Batch
 		}
 	}
 	tx.Commit()
-	fmt.Println(list)
-
 	return list
 
 }

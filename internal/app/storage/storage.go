@@ -27,15 +27,11 @@ func NewStorage(p string, db *sql.DB) *Storage {
 	}
 }
 
-func (strg *Storage) Save(key, value string) string {
+func (strg *Storage) Save(key, value string) {
 	strg.data[key] = value
 	if strg.path != "" {
 		strg.SaveToFile()
 	}
-
-	//strg.SaveToDB(value, key)
-
-	return key
 }
 
 func (strg *Storage) LongURL(key string) (string, error) {
