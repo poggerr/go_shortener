@@ -52,9 +52,9 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortUrl := ServiceCreateBatch(v.OriginalUrl, defURL, strg)
-		list[i].ShortUrl = shortUrl
-		query := fmt.Sprintf("INSERT INTO urls (correlation_id, longurl, shorturl) VALUES('%s', '%s', '%s')", v.CorrelationId, v.OriginalUrl, shortUrl)
+		shortUrl := ServiceCreateBatch(v.OriginalURL, defURL, strg)
+		list[i].ShortURL = shortUrl
+		query := fmt.Sprintf("INSERT INTO urls (correlation_id, longurl, shorturl) VALUES('%s', '%s', '%s')", v.CorrelationID, v.OriginalURL, shortUrl)
 		_, err = tx.ExecContext(ctx, query)
 		if err != nil {
 			tx.Rollback()
