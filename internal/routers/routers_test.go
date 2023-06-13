@@ -92,8 +92,8 @@ func TestHandlersPost(t *testing.T) {
 		//{api: "/", method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
 		//{api: "/id", method: "GET", url: "https://practicum.yandex.ru/", status: 200, location: "https://practicum.yandex.ru/"},
 		{api: "/id", method: "GET", url: "https://www.google.com/", status: 200, location: "https://www.google.com/"},
-		{api: "/api/service", method: "POST", url: "https://practicum.yandex.ru/", contentType: "application/json", status: 201},
-		{api: "/api/service", method: "POST", url: "https://www.google.com/", contentType: "application/json", status: 201},
+		{api: "/api/shorten", method: "POST", url: "https://practicum.yandex.ru/", contentType: "application/json", status: 201},
+		{api: "/api/shorten", method: "POST", url: "https://www.google.com/", contentType: "application/json", status: 201},
 	}
 
 	for _, v := range testTable {
@@ -119,7 +119,7 @@ func TestHandlersPost(t *testing.T) {
 			defer resp.Body.Close()
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Location"))
-		case "/api/service":
+		case "/api/shorten":
 			resp, _ := testRequestJSON(t, ts, v.method, v.api, v.url)
 			defer resp.Body.Close()
 			assert.Equal(t, v.status, resp.StatusCode)
@@ -150,7 +150,7 @@ func TestGzipCompression(t *testing.T) {
 		err = zb.Close()
 		require.NoError(t, err)
 
-		r := httptest.NewRequest("POST", ts.URL+"/api/service", buf)
+		r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
 		r.RequestURI = ""
 		r.Header.Set("Content-Encoding", "gzip")
 
@@ -167,7 +167,7 @@ func TestGzipCompression(t *testing.T) {
 
 	//t.Run("accepts_gzip", func(t *testing.T) {
 	//	buf := bytes.NewBufferString(requestBody)
-	//	r := httptest.NewRequest("POST", ts.URL+"/api/service", buf)
+	//	r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
 	//	r.RequestURI = ""
 	//	r.Header.Set("Accept-Encoding", "gzip")
 	//
