@@ -6,7 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/poggerr/go_shortener/internal/app/shorten"
+	"github.com/poggerr/go_shortener/internal/app/models"
+	"github.com/poggerr/go_shortener/internal/app/service"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -31,7 +32,7 @@ func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB) *App {
 
 func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	ans, err := shorten.UnShoring(id, a.storage)
+	ans, err := service.UnShoring(id, a.storage)
 	if err != nil {
 		fmt.Fprint(res, err.Error())
 		logger.Initialize().Info(err)
@@ -51,7 +52,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short := shorten.Shorting(string(body), a.storage)
+	short := service.Shorting(string(body), a.storage)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
@@ -61,25 +62,20 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 }
 
-type URL struct {
-	LongURL  string `json:"url"`
-	ShortURL string `json:"result"`
-}
-
 func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	var url URL
+	var url models.URL
 
 	err = json.Unmarshal(body, &url)
 	if err != nil {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL := shorten.Shorting(url.LongURL, a.storage)
+	shortURL := service.Shorting(url.LongURL, a.storage)
 	shortenMap := make(map[string]string)
 
 	shortURL = a.cfg.DefURL + "/" + shortURL
@@ -106,4 +102,30 @@ func (a *App) DBConnect(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusInternalServerError)
 	}
 	res.WriteHeader(http.StatusOK)
+}
+
+func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
+	var list models.BatchList
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal(body, &list)
+
+	fmt.Println(list)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	list = service.SaveMultipleToDB(list, a.storage)
+
+	marshal, err := json.Marshal(list)
+	if err != nil {
+		logger.Initialize().Info("Ошибка при формировании ответа ", err)
+	}
+
+	res.WriteHeader(http.StatusOK)
+	res.Write(marshal)
+
 }
