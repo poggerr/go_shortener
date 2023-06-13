@@ -121,6 +121,7 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info("Ошибка при формировании ответа ", err)
 	}
 
+	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusCreated)
 	res.Write(marshal)
 
