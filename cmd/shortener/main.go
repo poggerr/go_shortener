@@ -13,25 +13,28 @@ import (
 func main() {
 	cfg := config.NewConf()
 
-	if cfg.DB != "" {
-		db, err := sql.Open("pgx", cfg.DB)
-		if err != nil {
-			logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	if cfg.DB == "" {
+		strg := storage.NewStorage(cfg.Path, nil)
+
+		if cfg.Path != "" {
+			strg.RestoreFromFile()
 		}
-		defer db.Close()
-	}
-	var db *sql.DB
 
+		r := routers.Router(cfg, strg, nil)
+		server.Server(cfg.Serv, r)
+	}
+	db, err := sql.Open("pgx", cfg.DB)
+	if err != nil {
+		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	}
+	defer db.Close()
 	strg := storage.NewStorage(cfg.Path, db)
-
-	if cfg.DB != "" {
-		strg.RestoreDB()
-	}
+	strg.RestoreDB()
 
 	if cfg.Path != "" {
 		strg.RestoreFromFile()
 	}
 
-	r := routers.Router(cfg, strg, db)
+	r := routers.Router(cfg, strg, nil)
 	server.Server(cfg.Serv, r)
 }
