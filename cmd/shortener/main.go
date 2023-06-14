@@ -29,12 +29,13 @@ func main() {
 	}
 	defer db.Close()
 	strg := storage.NewStorage(cfg.Path, db)
+
 	strg.RestoreDB()
 
 	if cfg.Path != "" {
 		strg.RestoreFromFile()
 	}
 
-	r := routers.Router(cfg, strg, nil)
+	r := routers.Router(cfg, strg, db)
 	server.Server(cfg.Serv, r)
 }
