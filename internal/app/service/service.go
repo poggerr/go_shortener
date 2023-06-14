@@ -14,10 +14,13 @@ func ServiceCreate(longURL, defURL string, strg *storage.Storage) (string, error
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
 	shortURL = defURL + "/" + shortURL
-	ans, err := strg.SaveToDB(longURL, shortURL)
-	if err != nil {
-		return ans, err
+	if strg.DB != nil {
+		ans, err := strg.SaveToDB(longURL, shortURL)
+		if err != nil {
+			return ans, err
+		}
 	}
+
 	return shortURL, nil
 }
 

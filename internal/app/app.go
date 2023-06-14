@@ -54,6 +54,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage)
 	if err != nil {
+		logger.Initialize().Info(err)
 		res.Header().Set("content-type", "text/plain; charset=utf-8")
 		res.WriteHeader(http.StatusConflict)
 		res.Write([]byte(short))

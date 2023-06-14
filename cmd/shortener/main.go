@@ -13,13 +13,20 @@ import (
 func main() {
 	cfg := config.NewConf()
 
-	db, err := sql.Open("pgx", cfg.DB)
-	if err != nil {
-		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	if cfg.DB != "" {
+		db, err := sql.Open("pgx", cfg.DB)
+		if err != nil {
+			logger.Initialize().Error("Ошибка при подключении к БД ", err)
+		}
+		defer db.Close()
 	}
-	defer db.Close()
+	var db *sql.DB
+
 	strg := storage.NewStorage(cfg.Path, db)
-	strg.RestoreDB()
+
+	if cfg.DB != "" {
+		strg.RestoreDB()
+	}
 
 	if cfg.Path != "" {
 		strg.RestoreFromFile()
