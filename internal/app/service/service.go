@@ -10,12 +10,15 @@ import (
 	"time"
 )
 
-func ServiceCreate(longURL, defURL string, strg *storage.Storage) string {
+func ServiceCreate(longURL, defURL string, strg *storage.Storage) (string, error) {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
 	shortURL = defURL + "/" + shortURL
-	strg.SaveToDB(longURL, shortURL)
-	return shortURL
+	ans, err := strg.SaveToDB(longURL, shortURL)
+	if err != nil {
+		return ans, err
+	}
+	return shortURL, nil
 }
 
 func ServiceCreateBatch(longURL, defURL string, strg *storage.Storage) string {

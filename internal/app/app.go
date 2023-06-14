@@ -52,7 +52,13 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage)
+	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage)
+	if err != nil {
+		res.Header().Set("content-type", "text/plain; charset=utf-8")
+		res.WriteHeader(http.StatusConflict)
+		res.Write([]byte(short))
+		return
+	}
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
@@ -75,7 +81,22 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage)
+	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage)
+	if err != nil {
+		shortenMap := make(map[string]string)
+
+		shortenMap["result"] = shortURL
+
+		marshal, err2 := json.Marshal(shortenMap)
+		if err2 != nil {
+			logger.Initialize().Info(err2)
+		}
+
+		res.Header().Set("content-type", "application/json ")
+		res.WriteHeader(http.StatusConflict)
+		res.Write(marshal)
+		return
+	}
 	shortenMap := make(map[string]string)
 
 	shortenMap["result"] = shortURL
