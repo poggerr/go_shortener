@@ -88,7 +88,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 
 		shortenMap["result"] = shortURL
 
-		marshal, err2 := json.Marshal(shortenMap)
+		marshal, err := json.Marshal(shortenMap)
 		if err2 != nil {
 			logger.Initialize().Info(err2)
 		}
