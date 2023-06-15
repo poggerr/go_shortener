@@ -24,14 +24,14 @@ func ServiceCreate(longURL, defURL string, strg *storage.Storage) (string, error
 	return shortURL, nil
 }
 
-func ServiceCreateBatch(longURL, defURL string, strg *storage.Storage) string {
+func ServiceSaveLocal(longURL, defURL string, strg *storage.Storage) string {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
 	shortURL = defURL + "/" + shortURL
 	return shortURL
 }
 
-func ServiceTake(shortURL string, strg *storage.Storage) (string, error) {
+func Take(shortURL string, strg *storage.Storage) (string, error) {
 	ans, err := strg.LongURL(shortURL)
 	return ans, err
 }
@@ -58,7 +58,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortURL := ServiceCreateBatch(v.OriginalURL, defURL, strg)
+		shortURL := ServiceSaveLocal(v.OriginalURL, defURL, strg)
 		list[i].ShortURL = shortURL
 		query := fmt.Sprintf("INSERT INTO urls (correlation_id, longurl, shorturl) VALUES('%s', '%s', '%s')", v.CorrelationID, v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)

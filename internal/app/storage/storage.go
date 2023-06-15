@@ -123,12 +123,11 @@ func (strg *Storage) SaveToDB(longurl, shorturl string) (string, error) {
 		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
 			query = fmt.Sprintf("SELECT shorturl FROM urls WHERE longurl = '%s'", longurl)
 			ans := strg.DB.QueryRowContext(ctx, query)
-			var shorturl2 string
-			err2 := ans.Scan(&shorturl2)
-			if err2 != nil {
-				logger.Initialize().Info(err2)
+			errScan := ans.Scan(&shorturl)
+			if errScan != nil {
+				logger.Initialize().Info(errScan)
 			}
-			return shorturl2, err
+			return shorturl, err
 		}
 	}
 	return "", err

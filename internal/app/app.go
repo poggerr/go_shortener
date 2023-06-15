@@ -32,7 +32,7 @@ func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB) *App {
 
 func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	ans, err := service.ServiceTake(id, a.storage)
+	ans, err := service.Take(id, a.storage)
 	if err != nil {
 		fmt.Fprint(res, err.Error())
 		logger.Initialize().Info(err)
@@ -89,8 +89,8 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		shortenMap["result"] = shortURL
 
 		marshal, err := json.Marshal(shortenMap)
-		if err2 != nil {
-			logger.Initialize().Info(err2)
+		if err != nil {
+			logger.Initialize().Info(err)
 		}
 
 		res.Header().Set("content-type", "application/json ")
