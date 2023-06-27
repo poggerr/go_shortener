@@ -229,6 +229,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	userId := authorization.GetUserID(c.Value)
 	if userId == "" {
+		res.Header().Set("content-type", "application/json ")
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
 		return
