@@ -35,13 +35,13 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 	return tokenString, nil
 }
 
-func GetUserID(tokenString string) *uuid.UUID {
+func GetUserID(tokenString string) string {
 	var secretKey = os.Getenv("SECRET_KEY")
 	claims := &Claims{}
 	jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
-	return claims.UserID
+	return claims.UserID.String()
 }
 
 func RegisterUser(strg *storage.Storage, user *models.User) {

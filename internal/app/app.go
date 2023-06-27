@@ -58,9 +58,12 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info("Ошибка при получении Cookie ", err)
 	}
 
-	userId := authorization.GetUserID(c.Value)
+	var userId string
+	if c != nil {
+		userId = authorization.GetUserID(c.Value)
+	}
 
-	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId.String())
+	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId)
 	if err != nil {
 		logger.Initialize().Info(err)
 		res.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -88,7 +91,10 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info("Ошибка при получении Cookie ", err)
 	}
 
-	userId := authorization.GetUserID(c.Value)
+	var userId string
+	if c != nil {
+		userId = authorization.GetUserID(c.Value)
+	}
 
 	var url models.URL
 
@@ -97,7 +103,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage, userId.String())
+	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage, userId)
 	if err != nil {
 		shortenMap := make(map[string]string)
 
@@ -222,13 +228,13 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	}
 
 	userId := authorization.GetUserID(c.Value)
-	if userId.String() == "" {
+	if userId == "" {
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
 		return
 	}
 
-	strg := a.storage.GetUrlsByUsesId(userId.String())
+	strg := a.storage.GetUrlsByUsesId(userId)
 
 	marshal, err := json.Marshal(strg)
 	if err != nil {
