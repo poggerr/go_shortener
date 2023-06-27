@@ -7,8 +7,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/poggerr/go_shortener/internal/app/models"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 	"path"
@@ -96,27 +98,46 @@ func (strg *Storage) RestoreFromFile() {
 }
 
 func (strg *Storage) RestoreDB() {
+	tx, err := strg.DB.Begin()
+	if err != nil {
+		logger.Initialize().Error(err)
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := strg.DB.ExecContext(ctx, `
+	_, err = tx.ExecContext(ctx, `
+	CREATE TABLE IF NOT EXISTS users (
+	    "id" UUID UNIQUE,
+	    "username" TEXT,
+		"pass" TEXT
+	)
+	`)
+	if err != nil {
+		logger.Initialize().Info("Ошибка при создании таблицы users ", err)
+	}
+
+	_, err = tx.ExecContext(ctx, `
 	CREATE TABLE IF NOT EXISTS urls (
-	    "correlation_id" TEXT,
-		"longurl" TEXT UNIQUE,
-		"shorturl" TEXT
+	    "user_id" TEXT,
+		"long_url" TEXT UNIQUE,
+		"short_url" TEXT,
+		"is_deleted" BOOL DEFAULT false
 	)
 	`)
 	if err != nil {
 		logger.Initialize().Info("Ошибка при создании таблицы urls ", err)
 	}
 
+	tx.Commit()
+
 }
 
-func (strg *Storage) SaveToDB(longurl, shorturl string) (string, error) {
+func (strg *Storage) SaveToDB(longurl, shorturl string, userId string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO urls (longurl, shorturl) VALUES ('%s', '%s')", longurl, shorturl)
+	query := fmt.Sprintf("INSERT INTO urls (long_url, short_url, user_id) VALUES ('%s', '%s', '%s')", longurl, shorturl, userId)
+	fmt.Println(query)
 	_, err := strg.DB.ExecContext(ctx, query)
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -131,4 +152,53 @@ func (strg *Storage) SaveToDB(longurl, shorturl string) (string, error) {
 		}
 	}
 	return "", err
+}
+
+func (strg *Storage) CreateUser(username, pass string, id *uuid.UUID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := fmt.Sprintf("INSERT INTO users (id, username, pass) VALUES ('%s', '%s', '%s')", id, username, pass)
+	_, err := strg.DB.ExecContext(ctx, query)
+	if err != nil {
+		logger.Initialize().Info("Ошибка при создании юзера ", err)
+		return err
+	}
+	return nil
+}
+
+func (strg *Storage) GetUserId(username string) *uuid.UUID {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var id *uuid.UUID
+	query := fmt.Sprintf("SELECT id FROM users WHERE username = '%s'", username)
+	ans := strg.DB.QueryRowContext(ctx, query)
+	errScan := ans.Scan(&id)
+	if errScan != nil {
+		logger.Initialize().Info(errScan)
+	}
+	return id
+}
+
+func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	query := fmt.Sprintf("SELECT * FROM urls WHERE user_id = '%s'", id)
+	rows, err := strg.DB.QueryContext(ctx, query)
+
+	storage := make(models.Storage, 0)
+	for rows.Next() {
+		var url models.Urls
+		if err = rows.Scan(&url.UserId, &url.ShortURL, &url.LongURL, &url.DeletedFlag); err != nil {
+			logger.Initialize().Info(err)
+		}
+		storage = append(storage, url)
+	}
+
+	if err = rows.Err(); err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	return &storage
 }

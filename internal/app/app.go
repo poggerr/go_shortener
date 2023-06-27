@@ -9,6 +9,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/app/models"
 	"github.com/poggerr/go_shortener/internal/app/service"
 	"github.com/poggerr/go_shortener/internal/app/storage"
+	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"io"
@@ -52,7 +53,14 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage)
+	c, err := req.Cookie("session_token")
+	if err != nil {
+		logger.Initialize().Info("Ошибка при получении Cookie ", err)
+	}
+
+	userId := authorization.GetUserID(c.Value)
+
+	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId.String())
 	if err != nil {
 		logger.Initialize().Info(err)
 		res.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -75,6 +83,13 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	c, err := req.Cookie("session_token")
+	if err != nil {
+		logger.Initialize().Info("Ошибка при получении Cookie ", err)
+	}
+
+	userId := authorization.GetUserID(c.Value)
+
 	var url models.URL
 
 	err = json.Unmarshal(body, &url)
@@ -82,7 +97,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage)
+	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage, userId.String())
 	if err != nil {
 		shortenMap := make(map[string]string)
 
@@ -145,6 +160,83 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusCreated)
+	res.Write(marshal)
+
+}
+
+func (a *App) SetToken(res http.ResponseWriter, req *http.Request) {
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
+	var user models.User
+
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+	id := a.storage.GetUserId(user.UserName)
+	jwtString, err := authorization.BuildJWTString(id)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	c := &http.Cookie{
+		Name:    "session_token",
+		Value:   jwtString,
+		Path:    "/",
+		Domain:  "localhost",
+		Expires: time.Now().Add(120 * time.Second),
+	}
+
+	http.SetCookie(res, c)
+
+	res.WriteHeader(http.StatusCreated)
+	res.Write([]byte(jwtString))
+
+}
+
+func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
+	var user models.User
+
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	authorization.RegisterUser(a.storage, &user)
+
+	res.WriteHeader(http.StatusCreated)
+	res.Write([]byte("Пользователь создан"))
+}
+
+func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
+	c, err := req.Cookie("session_token")
+	if err != nil {
+		logger.Initialize().Info("Ошибка при получении Cookie ", err)
+	}
+
+	userId := authorization.GetUserID(c.Value)
+	if userId.String() == "" {
+		res.WriteHeader(http.StatusUnauthorized)
+		res.Write([]byte("Пользователь не авторизован!"))
+		return
+	}
+
+	strg := a.storage.GetUrlsByUsesId(userId.String())
+
+	marshal, err := json.Marshal(strg)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	res.Header().Set("content-type", "application/json ")
+	res.WriteHeader(http.StatusOK)
 	res.Write(marshal)
 
 }

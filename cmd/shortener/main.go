@@ -4,11 +4,19 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/routers"
 	"github.com/poggerr/go_shortener/internal/server"
+	"log"
 )
+
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+}
 
 func main() {
 	cfg := config.NewConf()
