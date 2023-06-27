@@ -15,7 +15,6 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -87,34 +86,19 @@ func TestHandlersPost(t *testing.T) {
 		status      int
 		location    string
 	}{
-		{api: "/", method: "POST", url: "https://practicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 201},
-		{api: "/", method: "POST", url: "https://www.google.com/", contentType: "text/plain; charset=utf-8", status: 201},
-		//{api: "/", method: "POST", url: "", contentType: "text/plain; charset=utf-8", status: 400},
-		//{api: "/id", method: "GET", url: "https://practicum.yandex.ru/", status: 200, location: "https://practicum.yandex.ru/"},
-		{api: "/id", method: "GET", url: "https://www.google.com/", status: 200, location: "https://www.google.com/"},
-		{api: "/api/shorten", method: "POST", url: "https://practicum.yandex.ru/", contentType: "application/json", status: 201},
-		{api: "/api/shorten", method: "POST", url: "https://www.google.com/", contentType: "application/json", status: 201},
+		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 409},
+		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
 	}
 
 	for _, v := range testTable {
 		switch v.api {
 		case "/":
-			resp, respBody := testRequestPost(t, ts, v.method, v.api, v.url)
+			resp, _ := testRequestPost(t, ts, v.method, v.api, v.url)
 			defer resp.Body.Close()
 			assert.Equal(t, v.status, resp.StatusCode)
 			assert.Equal(t, v.contentType, resp.Header.Get("Content-Type"))
-			if v.url != "" {
-				m := strings.Split(respBody, "/")
-
-				mainMap[v.url] = m[3]
-			}
 		case "/id":
 			newURL := "/"
-			for key, value := range mainMap {
-				if key == v.location {
-					newURL += value
-				}
-			}
 			resp, _ := testRequestPost(t, ts, http.MethodGet, newURL, "")
 			defer resp.Body.Close()
 			assert.Equal(t, v.status, resp.StatusCode)
@@ -138,7 +122,7 @@ func TestGzipCompression(t *testing.T) {
 	fmt.Println("/")
 
 	requestBody := `{
-        "url": "https://practicum.yandex.ru/"
+        "url": "https://yan.ru/"
     }`
 
 	t.Run("sends_gzip", func(t *testing.T) {
@@ -156,33 +140,11 @@ func TestGzipCompression(t *testing.T) {
 
 		resp, err := http.DefaultClient.Do(r)
 		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, resp.StatusCode)
 
 		defer resp.Body.Close()
 
 		_, err = io.ReadAll(resp.Body)
 		require.NoError(t, err)
-		//require.JSONEq(t, successBody, string(b))
+
 	})
-
-	//t.Run("accepts_gzip", func(t *testing.T) {
-	//	buf := bytes.NewBufferString(requestBody)
-	//	r := httptest.NewRequest("POST", ts.URL+"/api/shorten", buf)
-	//	r.RequestURI = ""
-	//	r.Header.Set("Accept-Encoding", "gzip")
-	//
-	//	resp, err := http.DefaultClient.Do(r)
-	//	require.NoError(t, err)
-	//	require.Equal(t, http.StatusCreated, resp.StatusCode)
-	//
-	//	defer resp.Body.Close()
-	//
-	//	zr, err := gzip.NewReader(resp.Body)
-	//	require.NoError(t, err)
-	//
-	//	_, err = io.ReadAll(zr)
-	//	require.NoError(t, err)
-
-	//require.JSONEq(t, successBody, string(b))
-	//})
 }

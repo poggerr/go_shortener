@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 	"path"
@@ -100,7 +102,7 @@ func (strg *Storage) RestoreDB() {
 	_, err := strg.DB.ExecContext(ctx, `
 	CREATE TABLE IF NOT EXISTS urls (
 	    "correlation_id" TEXT,
-		"longurl" TEXT,
+		"longurl" TEXT UNIQUE,
 		"shorturl" TEXT
 	)
 	`)
@@ -110,14 +112,23 @@ func (strg *Storage) RestoreDB() {
 
 }
 
-func (strg *Storage) SaveToDB(longurl, shorturl string) {
+func (strg *Storage) SaveToDB(longurl, shorturl string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := fmt.Sprintf("INSERT INTO urls (longurl, shorturl) VALUES ('%s', '%s')", longurl, shorturl)
-
 	_, err := strg.DB.ExecContext(ctx, query)
 	if err != nil {
-		logger.Initialize().Info("Ошибка при записи в urls ", err)
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+			query = fmt.Sprintf("SELECT shorturl FROM urls WHERE longurl = '%s'", longurl)
+			ans := strg.DB.QueryRowContext(ctx, query)
+			errScan := ans.Scan(&shorturl)
+			if errScan != nil {
+				logger.Initialize().Info(errScan)
+			}
+			return shorturl, err
+		}
 	}
+	return "", err
 }
