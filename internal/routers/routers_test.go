@@ -31,7 +31,16 @@ func NewDefConf() config.Config {
 }
 
 var cfg = NewDefConf()
-var strg = storage.NewStorage("/tmp/short-url-db.json")
+var strg = storage.NewStorage("/tmp/short-url-db.json", connectDB())
+
+func connectDB() *sql.DB {
+	db, err := sql.Open("pgx", cfg.DB)
+	if err != nil {
+		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+	}
+	defer db.Close()
+	return db
+}
 
 func testRequestPost(t *testing.T, ts *httptest.Server, method,
 	path string, oldURL string) (*http.Response, string) {
@@ -67,12 +76,7 @@ func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, lon
 
 func TestHandlersPost(t *testing.T) {
 	logger.Initialize()
-	db, err := sql.Open("pgx", cfg.DB)
-	if err != nil {
-		logger.Initialize().Error("Ошибка при подключении к БД ", err)
-	}
-	defer db.Close()
-	ts := httptest.NewServer(Router(&cfg, strg, db))
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB))
 	defer ts.Close()
 
 	var testTable = []struct {
@@ -128,12 +132,7 @@ func TestHandlersPost(t *testing.T) {
 
 func TestGzipCompression(t *testing.T) {
 	logger.Initialize()
-	db, err := sql.Open("pgx", cfg.DB)
-	if err != nil {
-		logger.Initialize().Error("Ошибка при подключении к БД ", err)
-	}
-	defer db.Close()
-	ts := httptest.NewServer(Router(&cfg, strg, db))
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB))
 	defer ts.Close()
 
 	fmt.Println("/")
