@@ -18,5 +18,6 @@ func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB) chi.Router {
 	r.Post("/api/shorten", newApp.CreateJSONShorten)
 	r.Get("/{id}", newApp.ReadOldURL)
 	r.Get("/ping", newApp.DBConnect)
+	r.Post("/api/shorten/batch", newApp.CreateBatch)
 	return r
 }

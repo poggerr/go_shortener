@@ -13,11 +13,6 @@ import (
 	"time"
 )
 
-type URL struct {
-	LongURL  string `json:"longUrl"`
-	ShortURL string `json:"shortUrl"`
-}
-
 type Storage struct {
 	data map[string]string
 	path string
@@ -32,15 +27,11 @@ func NewStorage(p string, db *sql.DB) *Storage {
 	}
 }
 
-func (strg *Storage) Save(key, value string) string {
+func (strg *Storage) Save(key, value string) {
 	strg.data[key] = value
 	if strg.path != "" {
 		strg.SaveToFile()
 	}
-
-	strg.SaveToDB(value, key)
-
-	return key
 }
 
 func (strg *Storage) LongURL(key string) (string, error) {
@@ -108,6 +99,7 @@ func (strg *Storage) RestoreDB() {
 
 	_, err := strg.DB.ExecContext(ctx, `
 	CREATE TABLE IF NOT EXISTS urls (
+	    "correlation_id" TEXT,
 		"longurl" TEXT,
 		"shorturl" TEXT
 	)
