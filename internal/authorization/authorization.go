@@ -36,7 +36,8 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 }
 
 func GetUserID(tokenString string) string {
-	var secretKey = os.Getenv("SECRET_KEY")
+	//var secretKey = os.Getenv("SECRET_KEY")
+	var secretKey = "scdcsdc,HVJHVCAJscdJccdsJVDVJDvqwe[p[;cqsc09cah989h"
 	claims := &Claims{}
 	jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
