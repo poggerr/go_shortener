@@ -1,6 +1,8 @@
 package app
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -10,17 +12,20 @@ import (
 	"github.com/poggerr/go_shortener/internal/logger"
 	"io"
 	"net/http"
+	"time"
 )
 
 type App struct {
 	cfg     *config.Config
 	storage *storage.Storage
+	db      *sql.DB
 }
 
-func NewApp(cfg *config.Config, strg *storage.Storage) *App {
+func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB) *App {
 	return &App{
 		cfg:     cfg,
 		storage: strg,
+		db:      db,
 	}
 }
 
@@ -91,4 +96,14 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 
 	res.Write(marshal)
 
+}
+
+func (a *App) DBConnect(res http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	if err := a.db.PingContext(ctx); err != nil {
+		logger.Initialize().Error("Ошибка при подключении к БД ", err)
+		res.WriteHeader(http.StatusInternalServerError)
+	}
+	res.WriteHeader(http.StatusOK)
 }
