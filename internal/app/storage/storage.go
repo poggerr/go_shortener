@@ -204,5 +204,15 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 }
 
 func (strg *Storage) DeleteUrls(mas []string) {
+	//ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	//defer cancel()
+	//
+	//query := fmt.Sprintf("INSERT INTO urls (id, username, pass) VALUES ('%s', '%s', '%s')", id, username, pass)
+	//_, err := strg.DB.ExecContext(ctx, query)
+	//if err != nil {
+	//	logger.Initialize().Info("Ошибка при создании юзера ", err)
+	//	return err
+	//}
+	//return nil
 
 }
