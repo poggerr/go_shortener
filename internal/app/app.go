@@ -258,7 +258,9 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 		fmt.Println("Hello")
 		str = ""
 	}
-	str = c.Value
+	if c != nil {
+		str = c.Value
+	}
 
 	fmt.Println(str)
 
