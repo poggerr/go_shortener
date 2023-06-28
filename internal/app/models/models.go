@@ -21,7 +21,7 @@ type User struct {
 
 type Urls struct {
 	UserId      string `db:"user_id"`
-	LongURL     string `json:"long_url"`
+	LongURL     string `json:"original_url"`
 	ShortURL    string `json:"short_url"`
 	DeletedFlag bool   `db:"is_deleted"`
 }
