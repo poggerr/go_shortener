@@ -253,18 +253,13 @@ func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
 
 func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session_token")
-	var str string
+	var userId string
 	if err != nil {
-		fmt.Println("Hello")
+		logger.Initialize().Info(err)
 	}
 	if c != nil {
-
-		str = c.Value
+		userId = authorization.GetUserID(c.Value)
 	}
-
-	fmt.Println(str)
-
-	userId := authorization.GetUserID(str)
 
 	fmt.Println(userId)
 	if userId == "" {
