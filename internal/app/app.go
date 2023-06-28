@@ -253,14 +253,13 @@ func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
 
 func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session_token")
+	str := c.Value
 	if err != nil {
 		fmt.Println("Hello")
+		str = ""
 	}
 
-	fmt.Println(c.Value)
-	fmt.Println("Bye")
-
-	userId := authorization.GetUserID(c.Value)
+	userId := authorization.GetUserID(str)
 	if userId == "" {
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
