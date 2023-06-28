@@ -272,10 +272,10 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
-	if len(*strg) == 0 {
-		res.WriteHeader(http.StatusNoContent)
-		return
-	}
+	//if len(*strg) == 0 {
+	//	res.WriteHeader(http.StatusNoContent)
+	//	return
+	//}
 
 	marshal, err := json.Marshal(strg)
 	if err != nil {
