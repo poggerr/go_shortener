@@ -257,6 +257,9 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 		fmt.Println("Hello")
 	}
 
+	fmt.Println(c.Value)
+	fmt.Println("Bye")
+
 	userId := authorization.GetUserID(c.Value)
 	if userId == "" {
 		res.WriteHeader(http.StatusUnauthorized)
