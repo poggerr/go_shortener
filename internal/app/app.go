@@ -272,7 +272,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
-	if len(*strg) < 1 {
+	if len(*strg) == 0 {
 		res.WriteHeader(http.StatusNoContent)
 		return
 	}
