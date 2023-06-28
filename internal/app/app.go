@@ -256,15 +256,17 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	var str string
 	if err != nil {
 		fmt.Println("Hello")
-		str = ""
 	}
 	if c != nil {
+
 		str = c.Value
 	}
 
 	fmt.Println(str)
 
 	userId := authorization.GetUserID(str)
+
+	fmt.Println(userId)
 	if userId == "" {
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
