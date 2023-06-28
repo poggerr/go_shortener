@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/poggerr/go_shortener/internal/app/models"
 	"github.com/poggerr/go_shortener/internal/app/service"
 	"github.com/poggerr/go_shortener/internal/app/storage"
@@ -53,17 +54,18 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	c, err := req.Cookie("session_token")
-	if err != nil {
-		logger.Initialize().Info("Ошибка при получении Cookie ", err)
-	}
+	//c, err := req.Cookie("session_token")
+	//if err != nil {
+	//	logger.Initialize().Info("Ошибка при получении Cookie ", err)
+	//}
+	//
+	////var userId string
+	//if c != nil {
+	//	userId = authorization.GetUserID(c.Value)
+	//}
+	userId := uuid.New()
 
-	var userId string
-	if c != nil {
-		userId = authorization.GetUserID(c.Value)
-	}
-
-	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId)
+	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId.String())
 	if err != nil {
 		logger.Initialize().Info(err)
 		res.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -71,6 +73,21 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(short))
 		return
 	}
+
+	jwtString, err := authorization.BuildJWTString(&userId)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	c := &http.Cookie{
+		Name:    "session_token",
+		Value:   jwtString,
+		Path:    "/",
+		Domain:  "localhost",
+		Expires: time.Now().Add(120 * time.Second),
+	}
+
+	http.SetCookie(res, c)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
@@ -229,7 +246,6 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	userId := authorization.GetUserID(c.Value)
 	if userId == "" {
-		res.Header().Set("content-type", "application/json ")
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
 		return
