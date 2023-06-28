@@ -190,7 +190,7 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 	storage := make(models.Storage, 0)
 	for rows.Next() {
 		var url models.Urls
-		if err = rows.Scan(&url.UserId, &url.ShortURL, &url.LongURL, &url.DeletedFlag); err != nil {
+		if err = rows.Scan(&url.UserId, &url.LongURL, &url.ShortURL, &url.DeletedFlag); err != nil {
 			logger.Initialize().Info(err)
 		}
 		storage = append(storage, url)
