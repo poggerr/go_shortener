@@ -205,7 +205,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	var userId string
 	if err != nil {
 		logger.Initialize().Info(err)
-
+		res.WriteHeader(http.StatusNoContent)
 	}
 	if c != nil {
 		userId = authorization.GetUserID(c.Value)
