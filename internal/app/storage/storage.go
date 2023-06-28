@@ -202,3 +202,7 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 
 	return &storage
 }
+
+func (strg *Storage) DeleteUrls(mas []string) {
+
+}

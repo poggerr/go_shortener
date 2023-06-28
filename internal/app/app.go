@@ -256,8 +256,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	var userId string
 	if err != nil {
 		logger.Initialize().Info(err)
-		res.WriteHeader(http.StatusUnauthorized)
-		res.Write([]byte("Пользователь не авторизован!"))
+		res.WriteHeader(http.StatusNoContent)
 		return
 	}
 	if c != nil {
@@ -291,4 +290,5 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 
+	res.WriteHeader(http.StatusAccepted)
 }
