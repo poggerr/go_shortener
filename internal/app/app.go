@@ -262,11 +262,11 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	}
 
 	fmt.Println(userId)
-	if userId == "" {
-		res.WriteHeader(http.StatusUnauthorized)
-		res.Write([]byte("Пользователь не авторизован!"))
-		return
-	}
+	//if userId == "" {
+	//	res.WriteHeader(http.StatusUnauthorized)
+	//	res.Write([]byte("Пользователь не авторизован!"))
+	//	return
+	//}
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
