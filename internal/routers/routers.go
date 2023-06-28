@@ -22,5 +22,6 @@ func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB) chi.Router {
 	r.Post("/user", newApp.SetToken)
 	r.Post("/user/registration", newApp.CreateUser)
 	r.Get("/api/user/urls", newApp.GetUrlsByUser)
+	r.Delete("/api/user/urls", newApp.DeleteUrls)
 	return r
 }

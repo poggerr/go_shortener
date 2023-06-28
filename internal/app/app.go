@@ -54,15 +54,6 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	//c, err := req.Cookie("session_token")
-	//if err != nil {
-	//	logger.Initialize().Info("Ошибка при получении Cookie ", err)
-	//}
-	//
-	////var userId string
-	//if c != nil {
-	//	userId = authorization.GetUserID(c.Value)
-	//}
 	userId := uuid.New()
 
 	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId.String())
@@ -263,7 +254,7 @@ func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
 func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session_token")
 	if err != nil {
-		logger.Initialize().Info("Ошибка при получении Cookie ", err)
+		fmt.Println("Hello")
 	}
 
 	userId := authorization.GetUserID(c.Value)
@@ -288,5 +279,9 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusOK)
 	res.Write(marshal)
+
+}
+
+func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 
 }
