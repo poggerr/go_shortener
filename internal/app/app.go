@@ -253,11 +253,12 @@ func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
 
 func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session_token")
-	str := c.Value
+	var str string
 	if err != nil {
 		fmt.Println("Hello")
 		str = ""
 	}
+	str = c.Value
 
 	fmt.Println(str)
 
