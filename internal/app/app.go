@@ -282,8 +282,6 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	fmt.Println(strg)
-
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusOK)
 	res.Write(marshal)
