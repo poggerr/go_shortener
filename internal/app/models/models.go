@@ -26,4 +26,8 @@ type Urls struct {
 	DeletedFlag bool   `db:"is_deleted"`
 }
 
+type Keys []struct {
+	Key string `json:"key"`
+}
+
 type Storage []Urls

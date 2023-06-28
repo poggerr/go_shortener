@@ -200,70 +200,15 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func (a *App) SetToken(res http.ResponseWriter, req *http.Request) {
-
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		return
-	}
-	var user models.User
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		logger.Initialize().Info(err)
-	}
-	id := a.storage.GetUserId(user.UserName)
-	jwtString, err := authorization.BuildJWTString(id)
-	if err != nil {
-		logger.Initialize().Info(err)
-	}
-
-	c := &http.Cookie{
-		Name:    "session_token",
-		Value:   jwtString,
-		Path:    "/",
-		Domain:  "localhost",
-		Expires: time.Now().Add(120 * time.Second),
-	}
-
-	http.SetCookie(res, c)
-
-	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte(jwtString))
-
-}
-
-func (a *App) CreateUser(res http.ResponseWriter, req *http.Request) {
-	body, err := io.ReadAll(req.Body)
-	if err != nil {
-		return
-	}
-	var user models.User
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		logger.Initialize().Info(err)
-	}
-
-	authorization.RegisterUser(a.storage, &user)
-
-	res.WriteHeader(http.StatusCreated)
-	res.Write([]byte("Пользователь создан"))
-}
-
 func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	c, err := req.Cookie("session_token")
 	var userId string
 	if err != nil {
 		logger.Initialize().Info(err)
-		res.WriteHeader(http.StatusNoContent)
-		return
 	}
 	if c != nil {
 		userId = authorization.GetUserID(c.Value)
 	}
-
-	fmt.Println(userId)
 	if userId == "" {
 		res.WriteHeader(http.StatusUnauthorized)
 		res.Write([]byte("Пользователь не авторизован!"))
@@ -272,10 +217,10 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
-	//if len(*strg) == 0 {
-	//	res.WriteHeader(http.StatusNoContent)
-	//	return
-	//}
+	if len(*strg) == 0 {
+		res.WriteHeader(http.StatusNoContent)
+		return
+	}
 
 	marshal, err := json.Marshal(strg)
 	if err != nil {
@@ -289,6 +234,19 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
+
+	var keys []string
+
+	err = json.Unmarshal(body, &keys)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+
+	service.ServiceDelete(keys, a.cfg.DefURL)
 
 	res.WriteHeader(http.StatusAccepted)
 }

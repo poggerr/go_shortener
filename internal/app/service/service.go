@@ -71,3 +71,10 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 	return list
 
 }
+
+func ServiceDelete(keys []string, str string) {
+	for i, v := range keys {
+		keys[i] = str + "/" + v
+	}
+
+}
