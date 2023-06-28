@@ -256,17 +256,20 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	var userId string
 	if err != nil {
 		logger.Initialize().Info(err)
+		res.WriteHeader(http.StatusUnauthorized)
+		res.Write([]byte("Пользователь не авторизован!"))
+		return
 	}
 	if c != nil {
 		userId = authorization.GetUserID(c.Value)
 	}
 
 	fmt.Println(userId)
-	//if userId == "" {
-	//	res.WriteHeader(http.StatusUnauthorized)
-	//	res.Write([]byte("Пользователь не авторизован!"))
-	//	return
-	//}
+	if userId == "" {
+		res.WriteHeader(http.StatusUnauthorized)
+		res.Write([]byte("Пользователь не авторизован!"))
+		return
+	}
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
