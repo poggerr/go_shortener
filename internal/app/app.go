@@ -247,7 +247,7 @@ func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	service.ServiceDelete(keys, a.cfg.DefURL)
+	service.ServiceDelete(keys, a.cfg.DefURL, a.storage)
 
 	res.WriteHeader(http.StatusAccepted)
 }

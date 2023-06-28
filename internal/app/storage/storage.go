@@ -204,15 +204,15 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 }
 
 func (strg *Storage) DeleteUrls(mas []string) {
-	//ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	//defer cancel()
-	//
-	//query := fmt.Sprintf("UPDATE urls (id, username, pass) VALUES ('%s', '%s', '%s')", id, username, pass)
-	//_, err := strg.DB.ExecContext(ctx, query)
-	//if err != nil {
-	//	logger.Initialize().Info("Ошибка при создании юзера ", err)
-	//	return err
-	//}
-	//return nil
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	for _, m := range mas {
+		query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s'", m)
+		_, err := strg.DB.ExecContext(ctx, query)
+		if err != nil {
+			logger.Initialize().Info("Ошибка при удалении", err)
+		}
+	}
 
 }

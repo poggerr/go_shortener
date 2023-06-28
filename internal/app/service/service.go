@@ -72,9 +72,10 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 
 }
 
-func ServiceDelete(keys []string, str string) {
+func ServiceDelete(keys []string, str string, strg *storage.Storage) {
 	for i, v := range keys {
 		keys[i] = str + "/" + v
 	}
+	strg.DeleteUrls(keys)
 
 }
