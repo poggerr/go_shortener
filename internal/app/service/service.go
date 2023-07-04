@@ -10,10 +10,9 @@ import (
 	"time"
 )
 
-func ServiceCreate(longURL, defURL string, strg *storage.Storage, userId string) (string, error) {
+func ServiceCreate(longURL string, strg *storage.Storage, userId string) (string, error) {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
-	shortURL = defURL + "/" + shortURL
 	if strg.DB == nil {
 		return shortURL, nil
 	}
@@ -24,10 +23,9 @@ func ServiceCreate(longURL, defURL string, strg *storage.Storage, userId string)
 	return shortURL, nil
 }
 
-func ServiceSaveLocal(longURL, defURL string, strg *storage.Storage) string {
+func ServiceSaveLocal(longURL string, strg *storage.Storage) string {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
-	shortURL = defURL + "/" + shortURL
 	return shortURL
 }
 
@@ -50,7 +48,7 @@ func Shorting(longURL string) string {
 	return shortURL
 }
 
-func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL string) models.BatchList {
+func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.BatchList {
 	tx, err := strg.DB.Begin()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -58,7 +56,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortURL := ServiceSaveLocal(v.OriginalURL, defURL, strg)
+		shortURL := ServiceSaveLocal(v.OriginalURL, strg)
 		list[i].ShortURL = shortURL
 		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)
@@ -72,10 +70,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 
 }
 
-func ServiceDelete(keys []string, str string, strg *storage.Storage) {
-	for i, v := range keys {
-		keys[i] = str + "/" + v
-	}
-	strg.DeleteUrls(keys)
+func ServiceDelete(keys []string, userId string, strg *storage.Storage) {
+	strg.DeleteUrls(keys, userId)
 
 }

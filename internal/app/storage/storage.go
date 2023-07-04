@@ -203,7 +203,7 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 	return &storage
 }
 
-func (strg *Storage) DeleteUrls(mas []string) {
+func (strg *Storage) DeleteUrls(mas []string, userId string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -216,3 +216,19 @@ func (strg *Storage) DeleteUrls(mas []string) {
 	}
 
 }
+
+//func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
+//	r.urlsToDeleteChan<- userURLs{UserID: userID, URLs: ids}
+//	return nil
+//}
+//
+//// Пришем воркер, который крутится и читает канал
+//func  (r *URLRepo) workerDeleteURLs(ctx contex.Context) error {
+//	for urls := range r.urlsToDeleteChan {
+//	// delete urls
+//	}
+//}
+//
+//
+//// запускаем его в фоне, докидываем контекст для закрытия
+//go r.workerDeleteURLs(ctx)

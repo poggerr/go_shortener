@@ -56,12 +56,13 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 	userId := uuid.New()
 
-	short, err := service.ServiceCreate(string(body), a.cfg.DefURL, a.storage, userId.String())
+	short, err := service.ServiceCreate(string(body), a.storage, userId.String())
+	shortURL := a.cfg.DefURL + "/" + short
 	if err != nil {
 		logger.Initialize().Info(err)
 		res.Header().Set("content-type", "text/plain; charset=utf-8")
 		res.WriteHeader(http.StatusConflict)
-		res.Write([]byte(short))
+		res.Write([]byte(shortURL))
 		return
 	}
 
@@ -84,7 +85,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 	res.WriteHeader(http.StatusCreated)
 
-	res.Write([]byte(short))
+	res.Write([]byte(shortURL))
 
 }
 
@@ -103,7 +104,9 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL, err := service.ServiceCreate(url.LongURL, a.cfg.DefURL, a.storage, userId.String())
+	short, err := service.ServiceCreate(url.LongURL, a.storage, userId.String())
+	shortURL := a.cfg.DefURL + "/" + short
+
 	if err != nil {
 		shortenMap := make(map[string]string)
 
@@ -187,7 +190,7 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	list = service.SaveMultipleToDB(list, a.storage, a.cfg.DefURL)
+	list = service.SaveMultipleToDB(list, a.storage)
 
 	marshal, err := json.Marshal(list)
 	if err != nil {
@@ -218,11 +221,6 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 
 	strg := a.storage.GetUrlsByUsesId(userId)
 
-	//if len(*strg) == 0 {
-	//	res.WriteHeader(http.StatusNoContent)
-	//	return
-	//}
-
 	marshal, err := json.Marshal(strg)
 	if err != nil {
 		logger.Initialize().Info(err)
@@ -235,6 +233,20 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
+	c, err := req.Cookie("session_token")
+	var userId string
+	if err != nil {
+		logger.Initialize().Info(err)
+		res.WriteHeader(http.StatusNoContent)
+	}
+	if c != nil {
+		userId = authorization.GetUserID(c.Value)
+	}
+	if userId == "" {
+		res.WriteHeader(http.StatusUnauthorized)
+		res.Write([]byte("Пользователь не авторизован!"))
+		return
+	}
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
@@ -247,7 +259,7 @@ func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	service.ServiceDelete(keys, a.cfg.DefURL, a.storage)
+	service.ServiceDelete(keys, userId, a.storage)
 
 	res.WriteHeader(http.StatusAccepted)
 }
