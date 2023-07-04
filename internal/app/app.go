@@ -219,7 +219,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	strg := a.storage.GetUrlsByUsesId(userId)
+	strg := a.storage.GetUrlsByUsesId(userId, a.cfg.DefURL)
 
 	marshal, err := json.Marshal(strg)
 	if err != nil {

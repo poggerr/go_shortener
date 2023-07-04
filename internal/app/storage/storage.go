@@ -180,7 +180,7 @@ func (strg *Storage) GetUserId(username string) *uuid.UUID {
 	return id
 }
 
-func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
+func (strg *Storage) GetUrlsByUsesId(id string, defURL string) *models.Storage {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -193,6 +193,7 @@ func (strg *Storage) GetUrlsByUsesId(id string) *models.Storage {
 		if err = rows.Scan(&url.UserId, &url.LongURL, &url.ShortURL, &url.DeletedFlag); err != nil {
 			logger.Initialize().Info(err)
 		}
+		url.ShortURL = defURL + "/" + url.ShortURL
 		storage = append(storage, url)
 	}
 
