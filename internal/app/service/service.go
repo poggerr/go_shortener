@@ -48,7 +48,7 @@ func Shorting(longURL string) string {
 	return shortURL
 }
 
-func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.BatchList {
+func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL string) models.BatchList {
 	tx, err := strg.DB.Begin()
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -57,7 +57,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage) models.Batch
 	}
 	for i, v := range list {
 		shortURL := ServiceSaveLocal(v.OriginalURL, strg)
-		list[i].ShortURL = shortURL
+		list[i].ShortURL = defURL + "/" + shortURL
 		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)
 		if err != nil {

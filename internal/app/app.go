@@ -190,7 +190,7 @@ func (a *App) CreateBatch(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	list = service.SaveMultipleToDB(list, a.storage)
+	list = service.SaveMultipleToDB(list, a.storage, a.cfg.DefURL)
 
 	marshal, err := json.Marshal(list)
 	if err != nil {
