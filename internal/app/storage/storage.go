@@ -210,15 +210,12 @@ type UserURLs struct {
 }
 
 func (strg *Storage) DeleteUrls(mas UserURLs) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	for _, m := range mas.URLs {
-		query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s' AND user_id='%s'", m, mas.UserID)
-		_, err := strg.DB.ExecContext(ctx, query)
-		if err != nil {
-			logger.Initialize().Info("Ошибка при удалении", err)
-		}
+	query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s' AND user_id='%s'", mas.URLs, mas.UserID)
+	_, err := strg.DB.ExecContext(ctx, query)
+	if err != nil {
+		logger.Initialize().Info("Ошибка при удалении", err)
 	}
-
 }

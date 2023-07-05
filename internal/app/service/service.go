@@ -75,6 +75,13 @@ type URLRepo struct {
 	repository       storage.Storage
 }
 
+func ServiceDelete(keys []string, userId string, repo *URLRepo) {
+	err := repo.DeleteAsync(keys, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
 func NewDeleter(strg *storage.Storage) *URLRepo {
 	return &URLRepo{
 		urlsToDeleteChan: make(chan storage.UserURLs, 10),
