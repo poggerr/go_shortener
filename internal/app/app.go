@@ -51,14 +51,39 @@ func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
+	c, err := req.Cookie("session_token")
+	var userId string
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+	switch c {
+	case nil:
+		uuidUserId := uuid.New()
+		jwtString, err := authorization.BuildJWTString(&uuidUserId)
+		if err != nil {
+			logger.Initialize().Info(err)
+		}
+
+		cook := &http.Cookie{
+			Name:    "session_token",
+			Value:   jwtString,
+			Path:    "/",
+			Domain:  "localhost",
+			Expires: time.Now().Add(120 * time.Second),
+		}
+
+		http.SetCookie(res, cook)
+		userId = uuidUserId.String()
+	default:
+		userId = authorization.GetUserID(c.Value)
+	}
+
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
 
-	userId := uuid.New()
-
-	short, err := service.ServiceCreate(string(body), a.storage, userId.String())
+	short, err := service.ServiceCreate(string(body), a.storage, userId)
 	shortURL := a.cfg.DefURL + "/" + short
 	if err != nil {
 		logger.Initialize().Info(err)
@@ -67,21 +92,6 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		res.Write([]byte(shortURL))
 		return
 	}
-
-	jwtString, err := authorization.BuildJWTString(&userId)
-	if err != nil {
-		logger.Initialize().Info(err)
-	}
-
-	c := &http.Cookie{
-		Name:    "session_token",
-		Value:   jwtString,
-		Path:    "/",
-		Domain:  "localhost",
-		Expires: time.Now().Add(120 * time.Second),
-	}
-
-	http.SetCookie(res, c)
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
@@ -92,12 +102,37 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 }
 
 func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
+	c, err := req.Cookie("session_token")
+	var userId string
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
+	switch c {
+	case nil:
+		uuidUserId := uuid.New()
+		jwtString, err := authorization.BuildJWTString(&uuidUserId)
+		if err != nil {
+			logger.Initialize().Info(err)
+		}
+
+		cook := &http.Cookie{
+			Name:    "session_token",
+			Value:   jwtString,
+			Path:    "/",
+			Domain:  "localhost",
+			Expires: time.Now().Add(120 * time.Second),
+		}
+
+		http.SetCookie(res, cook)
+		userId = uuidUserId.String()
+	default:
+		userId = authorization.GetUserID(c.Value)
+	}
+
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return
 	}
-
-	userId := uuid.New()
 
 	var url models.URL
 
@@ -106,7 +141,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	short, err := service.ServiceCreate(url.LongURL, a.storage, userId.String())
+	short, err := service.ServiceCreate(url.LongURL, a.storage, userId)
 	shortURL := a.cfg.DefURL + "/" + short
 
 	if err != nil {
@@ -118,21 +153,6 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			logger.Initialize().Info(err)
 		}
-
-		jwtString, err := authorization.BuildJWTString(&userId)
-		if err != nil {
-			logger.Initialize().Info(err)
-		}
-
-		c := &http.Cookie{
-			Name:    "session_token",
-			Value:   jwtString,
-			Path:    "/",
-			Domain:  "localhost",
-			Expires: time.Now().Add(120 * time.Second),
-		}
-
-		http.SetCookie(res, c)
 
 		res.Header().Set("content-type", "application/json ")
 		res.WriteHeader(http.StatusConflict)
@@ -147,21 +167,6 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		logger.Initialize().Info(err)
 	}
-
-	jwtString, err := authorization.BuildJWTString(&userId)
-	if err != nil {
-		logger.Initialize().Info(err)
-	}
-
-	c := &http.Cookie{
-		Name:    "session_token",
-		Value:   jwtString,
-		Path:    "/",
-		Domain:  "localhost",
-		Expires: time.Now().Add(120 * time.Second),
-	}
-
-	http.SetCookie(res, c)
 
 	res.Header().Set("content-type", "application/json ")
 	res.WriteHeader(http.StatusCreated)
