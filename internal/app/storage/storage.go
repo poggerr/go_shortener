@@ -210,7 +210,7 @@ type UserURLs struct {
 }
 
 func (strg *Storage) DeleteUrls(mas UserURLs) {
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 61*time.Second)
 	defer cancel()
 
 	for _, m := range mas.URLs {
