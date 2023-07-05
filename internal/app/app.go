@@ -261,7 +261,10 @@ func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	service.ServiceDelete(keys, userId, a.repo)
+	err = a.repo.DeleteAsync(keys, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	res.WriteHeader(http.StatusAccepted)
 }
