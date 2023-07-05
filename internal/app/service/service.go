@@ -70,7 +70,33 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 
 }
 
-func ServiceDelete(keys []string, userId string, strg *storage.Storage) {
-	strg.DeleteUrls(keys, userId)
+type URLRepo struct {
+	urlsToDeleteChan chan storage.UserURLs
+	repository       storage.Storage
+}
 
+func ServiceDelete(keys []string, userId string, repo *URLRepo) {
+	err := repo.DeleteAsync(keys, userId)
+	if err != nil {
+		fmt.Println(err)
+	}
+}
+
+func NewDeleter(strg *storage.Storage) *URLRepo {
+	return &URLRepo{
+		urlsToDeleteChan: make(chan storage.UserURLs, 10),
+		repository:       *strg,
+	}
+}
+
+func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
+	r.urlsToDeleteChan <- storage.UserURLs{UserID: userID, URLs: ids}
+	return nil
+}
+
+// Пришем воркер, который крутится и читает канал
+func (r *URLRepo) WorkerDeleteURLs() {
+	for urls := range r.urlsToDeleteChan {
+		r.repository.DeleteUrls(urls)
+	}
 }

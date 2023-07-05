@@ -22,13 +22,15 @@ type App struct {
 	cfg     *config.Config
 	storage *storage.Storage
 	db      *sql.DB
+	repo    *service.URLRepo
 }
 
-func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB) *App {
+func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service.URLRepo) *App {
 	return &App{
 		cfg:     cfg,
 		storage: strg,
 		db:      db,
+		repo:    repo,
 	}
 }
 
@@ -259,7 +261,7 @@ func (a *App) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	service.ServiceDelete(keys, userId, a.storage)
+	service.ServiceDelete(keys, userId, a.repo)
 
 	res.WriteHeader(http.StatusAccepted)
 }

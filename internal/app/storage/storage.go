@@ -204,12 +204,17 @@ func (strg *Storage) GetUrlsByUsesId(id string, defURL string) *models.Storage {
 	return &storage
 }
 
-func (strg *Storage) DeleteUrls(mas []string, userId string) {
+type UserURLs struct {
+	UserID string
+	URLs   []string
+}
+
+func (strg *Storage) DeleteUrls(mas UserURLs) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	for _, m := range mas {
-		query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s'", m)
+	for _, m := range mas.URLs {
+		query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s' AND user_id='%s'", m, mas.UserID)
 		_, err := strg.DB.ExecContext(ctx, query)
 		if err != nil {
 			logger.Initialize().Info("Ошибка при удалении", err)
@@ -217,19 +222,3 @@ func (strg *Storage) DeleteUrls(mas []string, userId string) {
 	}
 
 }
-
-//func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
-//	r.urlsToDeleteChan<- userURLs{UserID: userID, URLs: ids}
-//	return nil
-//}
-//
-//// Пришем воркер, который крутится и читает канал
-//func  (r *URLRepo) workerDeleteURLs(ctx contex.Context) error {
-//	for urls := range r.urlsToDeleteChan {
-//	// delete urls
-//	}
-//}
-//
-//
-//// запускаем его в фоне, докидываем контекст для закрытия
-//go r.workerDeleteURLs(ctx)

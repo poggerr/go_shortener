@@ -1,6 +1,8 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type BatchList []struct {
 	CorrelationID string `json:"correlation_id"`
