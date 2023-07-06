@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -136,14 +135,11 @@ func (strg *Storage) SaveToDB(longurl, shorturl string, userID string) (string, 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO urls (long_url, short_url, user_id) VALUES ('%s', '%s', '%s')", longurl, shorturl, userID)
-	fmt.Println(query)
-	_, err := strg.DB.ExecContext(ctx, query)
+	_, err := strg.DB.ExecContext(ctx, "INSERT INTO urls (long_url, short_url, user_id) VALUES ($1, $2, $3)", longurl, shorturl, userID)
 	if err != nil {
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
-			query = fmt.Sprintf("SELECT short_url FROM urls WHERE long_url = '%s'", longurl)
-			ans := strg.DB.QueryRowContext(ctx, query)
+			ans := strg.DB.QueryRowContext(ctx, "SELECT short_url FROM urls WHERE long_url=$1", longurl)
 			errScan := ans.Scan(&shorturl)
 			if errScan != nil {
 				logger.Initialize().Info(errScan)
@@ -158,8 +154,7 @@ func (strg *Storage) CreateUser(username, pass string, id *uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO users (id, username, pass) VALUES ('%s', '%s', '%s')", id, username, pass)
-	_, err := strg.DB.ExecContext(ctx, query)
+	_, err := strg.DB.ExecContext(ctx, "INSERT INTO users (id, username, pass) VALUES ($1, $2, $3)", id, username, pass)
 	if err != nil {
 		logger.Initialize().Info("Ошибка при создании юзера ", err)
 		return err
@@ -171,8 +166,7 @@ func (strg *Storage) GetUserID(username string) *uuid.UUID {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var id *uuid.UUID
-	query := fmt.Sprintf("SELECT id FROM users WHERE username = '%s'", username)
-	ans := strg.DB.QueryRowContext(ctx, query)
+	ans := strg.DB.QueryRowContext(ctx, "SELECT id FROM users WHERE username=$1", username)
 	errScan := ans.Scan(&id)
 	if errScan != nil {
 		logger.Initialize().Info(errScan)
@@ -184,8 +178,7 @@ func (strg *Storage) TakeLongURLIsDelete(shortURL string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var isDelete bool
-	query := fmt.Sprintf("SELECT is_deleted FROM urls WHERE short_url = '%s'", shortURL)
-	ans := strg.DB.QueryRowContext(ctx, query)
+	ans := strg.DB.QueryRowContext(ctx, "SELECT is_deleted FROM urls WHERE short_url=$1", shortURL)
 	errScan := ans.Scan(&isDelete)
 	if errScan != nil {
 		logger.Initialize().Info(errScan)
@@ -197,8 +190,7 @@ func (strg *Storage) GetUrlsByUsesID(id string, defURL string) *models.Storage {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf("SELECT * FROM urls WHERE user_id = '%s'", id)
-	rows, err := strg.DB.QueryContext(ctx, query)
+	rows, err := strg.DB.QueryContext(ctx, "SELECT * FROM urls WHERE user_id=$1", id)
 	if err != nil {
 		logger.Initialize().Info(err)
 	}
@@ -234,8 +226,7 @@ func (strg *Storage) DeleteUrls(mas UserURLs) {
 	defer cancel()
 
 	for _, m := range mas.URLs {
-		query := fmt.Sprintf("UPDATE urls SET is_deleted=true WHERE short_url='%s' AND user_id='%s'", m, mas.UserID)
-		_, err = tx.ExecContext(ctx, query)
+		_, err = tx.ExecContext(ctx, "UPDATE urls SET is_deleted=true WHERE short_url=$1 AND user_id=$2", m, mas.UserID)
 		if err != nil {
 			logger.Initialize().Info("Ошибка при удалении", err)
 		}
