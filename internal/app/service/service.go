@@ -75,13 +75,6 @@ type URLRepo struct {
 	repository       storage.Storage
 }
 
-func ServiceDelete(keys []string, userId string, repo *URLRepo) {
-	err := repo.DeleteAsync(keys, userId)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
 func NewDeleter(strg *storage.Storage) *URLRepo {
 	return &URLRepo{
 		urlsToDeleteChan: make(chan storage.UserURLs, 10),
@@ -97,6 +90,6 @@ func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
 // Пришем воркер, который крутится и читает канал
 func (r *URLRepo) WorkerDeleteURLs() {
 	for urls := range r.urlsToDeleteChan {
-		go r.repository.DeleteUrls(urls)
+		r.repository.DeleteUrls(urls)
 	}
 }
