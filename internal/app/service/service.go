@@ -10,13 +10,13 @@ import (
 	"time"
 )
 
-func ServiceCreate(longURL string, strg *storage.Storage, userId string) (string, error) {
+func ServiceCreate(longURL string, strg *storage.Storage, userID string) (string, error) {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
 	if strg.DB == nil {
 		return shortURL, nil
 	}
-	ans, err := strg.SaveToDB(longURL, shortURL, userId)
+	ans, err := strg.SaveToDB(longURL, shortURL, userID)
 	if err != nil {
 		return ans, err
 	}
@@ -32,7 +32,7 @@ func ServiceSaveLocal(longURL string, strg *storage.Storage) string {
 func Take(shortURL string, strg *storage.Storage) (string, bool, error) {
 	ans, err := strg.LongURL(shortURL)
 	if strg.DB != nil {
-		isDelete := strg.TakeLongUrlIsDelete(shortURL)
+		isDelete := strg.TakeLongURLIsDelete(shortURL)
 		return ans, isDelete, err
 	}
 	return ans, false, err

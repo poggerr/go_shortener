@@ -16,7 +16,7 @@ type Claims struct {
 	UserID *uuid.UUID
 }
 
-const TOKEN_EXP = time.Hour * 3
+const TokenExp = time.Hour * 3
 
 func BuildJWTString(uuid *uuid.UUID) (string, error) {
 
@@ -24,7 +24,7 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExp)),
 		},
 		UserID: uuid,
 	})

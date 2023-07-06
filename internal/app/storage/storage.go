@@ -132,11 +132,11 @@ func (strg *Storage) RestoreDB() {
 
 }
 
-func (strg *Storage) SaveToDB(longurl, shorturl string, userId string) (string, error) {
+func (strg *Storage) SaveToDB(longurl, shorturl string, userID string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	query := fmt.Sprintf("INSERT INTO urls (long_url, short_url, user_id) VALUES ('%s', '%s', '%s')", longurl, shorturl, userId)
+	query := fmt.Sprintf("INSERT INTO urls (long_url, short_url, user_id) VALUES ('%s', '%s', '%s')", longurl, shorturl, userID)
 	fmt.Println(query)
 	_, err := strg.DB.ExecContext(ctx, query)
 	if err != nil {
@@ -167,7 +167,7 @@ func (strg *Storage) CreateUser(username, pass string, id *uuid.UUID) error {
 	return nil
 }
 
-func (strg *Storage) GetUserId(username string) *uuid.UUID {
+func (strg *Storage) GetUserID(username string) *uuid.UUID {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var id *uuid.UUID
@@ -180,11 +180,11 @@ func (strg *Storage) GetUserId(username string) *uuid.UUID {
 	return id
 }
 
-func (strg *Storage) TakeLongUrlIsDelete(shortUrl string) bool {
+func (strg *Storage) TakeLongURLIsDelete(shortURL string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var isDelete bool
-	query := fmt.Sprintf("SELECT is_deleted FROM urls WHERE short_url = '%s'", shortUrl)
+	query := fmt.Sprintf("SELECT is_deleted FROM urls WHERE short_url = '%s'", shortURL)
 	ans := strg.DB.QueryRowContext(ctx, query)
 	errScan := ans.Scan(&isDelete)
 	if errScan != nil {
@@ -193,17 +193,20 @@ func (strg *Storage) TakeLongUrlIsDelete(shortUrl string) bool {
 	return isDelete
 }
 
-func (strg *Storage) GetUrlsByUsesId(id string, defURL string) *models.Storage {
+func (strg *Storage) GetUrlsByUsesID(id string, defURL string) *models.Storage {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	query := fmt.Sprintf("SELECT * FROM urls WHERE user_id = '%s'", id)
 	rows, err := strg.DB.QueryContext(ctx, query)
+	if err != nil {
+		logger.Initialize().Info(err)
+	}
 
 	storage := make(models.Storage, 0)
 	for rows.Next() {
 		var url models.Urls
-		if err = rows.Scan(&url.UserId, &url.LongURL, &url.ShortURL, &url.DeletedFlag); err != nil {
+		if err = rows.Scan(&url.UserID, &url.LongURL, &url.ShortURL, &url.DeletedFlag); err != nil {
 			logger.Initialize().Info(err)
 		}
 		url.ShortURL = defURL + "/" + url.ShortURL
