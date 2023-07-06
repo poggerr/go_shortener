@@ -180,6 +180,19 @@ func (strg *Storage) GetUserId(username string) *uuid.UUID {
 	return id
 }
 
+func (strg *Storage) TakeLongUrlIsDelete(shortUrl string) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var isDelete bool
+	query := fmt.Sprintf("SELECT is_deleted FROM urls WHERE short_url = '%s'", shortUrl)
+	ans := strg.DB.QueryRowContext(ctx, query)
+	errScan := ans.Scan(&isDelete)
+	if errScan != nil {
+		logger.Initialize().Info(errScan)
+	}
+	return isDelete
+}
+
 func (strg *Storage) GetUrlsByUsesId(id string, defURL string) *models.Storage {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

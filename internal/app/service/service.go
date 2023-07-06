@@ -29,9 +29,13 @@ func ServiceSaveLocal(longURL string, strg *storage.Storage) string {
 	return shortURL
 }
 
-func Take(shortURL string, strg *storage.Storage) (string, error) {
+func Take(shortURL string, strg *storage.Storage) (string, bool, error) {
 	ans, err := strg.LongURL(shortURL)
-	return ans, err
+	if strg.DB != nil {
+		isDelete := strg.TakeLongUrlIsDelete(shortURL)
+		return ans, isDelete, err
+	}
+	return ans, false, err
 }
 
 func Shorting(longURL string) string {

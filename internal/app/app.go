@@ -36,7 +36,12 @@ func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service
 
 func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	ans, err := service.Take(id, a.storage)
+	ans, isDelete, err := service.Take(id, a.storage)
+	if isDelete == true {
+		res.Header().Set("content-type", "text/plain ")
+		res.WriteHeader(http.StatusGone)
+		return
+	}
 	if err != nil {
 		fmt.Fprint(res, err.Error())
 		logger.Initialize().Info(err)
