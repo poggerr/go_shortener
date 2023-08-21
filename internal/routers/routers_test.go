@@ -19,8 +19,6 @@ import (
 	"testing"
 )
 
-var mainMap = make(map[string]string)
-
 func NewDefConf() config.Config {
 	return config.Config{
 		Serv:   ":8080",
