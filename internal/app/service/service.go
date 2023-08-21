@@ -91,7 +91,6 @@ func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
 	return nil
 }
 
-// Пришем воркер, который крутится и читает канал
 func (r *URLRepo) WorkerDeleteURLs() {
 	for urls := range r.urlsToDeleteChan {
 		r.repository.DeleteUrls(urls)
