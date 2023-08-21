@@ -1,3 +1,4 @@
+// Package storage содержит код для взаимодействия с хранилищем
 package storage
 
 import (

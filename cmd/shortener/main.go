@@ -11,9 +11,6 @@ import (
 	"github.com/poggerr/go_shortener/internal/routers"
 	"github.com/poggerr/go_shortener/internal/server"
 	"log"
-	"os"
-	"runtime"
-	"runtime/pprof"
 )
 
 func init() {
@@ -26,17 +23,6 @@ func main() {
 	cfg := config.NewConf()
 
 	if cfg.DB != "" {
-
-		fmem, err := os.Create(`mem.pprof`)
-		if err != nil {
-			panic(err)
-		}
-		defer fmem.Close()
-		runtime.GC() // получаем статистику по использованию памяти
-		if err = pprof.WriteHeapProfile(fmem); err != nil {
-			panic(err)
-		}
-
 		db, err := sql.Open("pgx", cfg.DB)
 		if err != nil {
 			fmt.Println(err.Error())

@@ -1,3 +1,4 @@
+// Package middlewares содержит все основные middleware проекта
 package middlewares
 
 import (
@@ -7,6 +8,7 @@ import (
 	"time"
 )
 
+// WithLogging Логирование каждого запроса
 func WithLogging(h http.Handler) http.Handler {
 	logFn := func(w http.ResponseWriter, r *http.Request) {
 		responseData := &logger.ResponseData{}

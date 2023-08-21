@@ -150,3 +150,51 @@ func TestGzipCompression(t *testing.T) {
 
 	})
 }
+
+func DefaultTestRequestPost(ts *httptest.Server, method,
+	path string, oldURL string) (*http.Response, string) {
+
+	req, err := http.NewRequest(method, ts.URL+path, bytes.NewBuffer([]byte(oldURL)))
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	resp, err := ts.Client().Do(req)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return resp, string(respBody)
+}
+
+func Example() {
+	go repo.WorkerDeleteURLs()
+	logger.Initialize()
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
+	defer ts.Close()
+
+	var testTable = []struct {
+		api         string
+		method      string
+		url         string
+		contentType string
+		status      int
+		location    string
+	}{
+		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 409},
+		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
+	}
+
+	for _, v := range testTable {
+		switch v.api {
+		case "/":
+			resp, _ := DefaultTestRequestPost(ts, v.method, v.api, v.url)
+			defer resp.Body.Close()
+		}
+	}
+}

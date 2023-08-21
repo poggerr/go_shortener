@@ -1,3 +1,4 @@
+// Package config выполняет фунцию конфигурации приложения
 package config
 
 import (
@@ -6,6 +7,7 @@ import (
 	"github.com/caarlos0/env/v8"
 )
 
+// Config базовая структура конфигурации
 type Config struct {
 	Serv   string `env:"SERVER_ADDRESS"`
 	DefURL string `env:"BASE_URL"`
