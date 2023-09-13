@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/caarlos0/env/v8"
+	"github.com/joho/godotenv"
+	"log"
 )
 
 // Config базовая структура конфигурации
@@ -16,6 +18,10 @@ type Config struct {
 }
 
 func NewConf() *Config {
+	if err := godotenv.Load(); err != nil {
+		log.Print("No .env file found")
+	}
+
 	var cfg Config
 
 	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
