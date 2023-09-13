@@ -202,5 +202,6 @@ func Example() {
 func BenchmarkRouter(B *testing.B) {
 	for i := 0; i < B.N; i++ {
 		Example()
+
 	}
 }
