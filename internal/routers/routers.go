@@ -2,6 +2,9 @@ package routers
 
 import (
 	"database/sql"
+	"net/http"
+	"net/http/pprof"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
 	"github.com/poggerr/go_shortener/internal/app/middlewares"
@@ -9,8 +12,6 @@ import (
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/gzip"
-	"net/http"
-	"net/http/pprof"
 )
 
 func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service.URLRepo) chi.Router {

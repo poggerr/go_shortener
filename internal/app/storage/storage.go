@@ -7,14 +7,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"os"
+	"path"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/poggerr/go_shortener/internal/app/models"
 	"github.com/poggerr/go_shortener/internal/logger"
-	"os"
-	"path"
-	"time"
 )
 
 type Storage struct {
@@ -175,7 +176,7 @@ func (strg *Storage) GetUserID(username string) *uuid.UUID {
 	return id
 }
 
-func (strg *Storage) TakeLongURLIsDelete(shortURL string) bool {
+func (strg *Storage) CheckLongURLIsDelete(shortURL string) bool {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	var isDelete bool

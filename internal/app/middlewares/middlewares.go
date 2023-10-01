@@ -3,9 +3,10 @@ package middlewares
 
 import (
 	"fmt"
-	"github.com/poggerr/go_shortener/internal/logger"
 	"net/http"
 	"time"
+
+	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 // WithLogging Логирование каждого запроса

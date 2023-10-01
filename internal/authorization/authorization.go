@@ -2,14 +2,11 @@
 package authorization
 
 import (
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
-	"github.com/poggerr/go_shortener/internal/app/models"
-	"github.com/poggerr/go_shortener/internal/app/storage"
-	"github.com/poggerr/go_shortener/internal/encrypt"
-	"github.com/poggerr/go_shortener/internal/logger"
 	"os"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 )
 
 type Claims struct {
@@ -46,14 +43,4 @@ func GetUserID(tokenString string) string {
 		return []byte(secretKey), nil
 	})
 	return claims.UserID.String()
-}
-
-// RegisterUser Регистрация пользователя. На данный момент не используется в проекте
-func RegisterUser(strg *storage.Storage, user *models.User) {
-	user.Pass = encrypt.Encrypt(user.Pass)
-	id := uuid.New()
-	err := strg.CreateUser(user.UserName, user.Pass, &id)
-	if err != nil {
-		logger.Initialize().Error(err)
-	}
 }

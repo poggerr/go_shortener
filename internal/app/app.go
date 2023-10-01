@@ -5,6 +5,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/poggerr/go_shortener/internal/app/models"
@@ -13,9 +17,6 @@ import (
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
-	"io"
-	"net/http"
-	"time"
 )
 
 type App struct {
@@ -36,7 +37,7 @@ func NewApp(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service
 
 func (a *App) ReadOldURL(res http.ResponseWriter, req *http.Request) {
 	id := chi.URLParam(req, "id")
-	ans, isDelete, err := service.Take(id, a.storage)
+	ans, isDelete, err := service.Check(id, a.storage)
 	if isDelete {
 		res.Header().Set("content-type", "text/plain ")
 		res.WriteHeader(http.StatusGone)
@@ -88,7 +89,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	short, err := service.ServiceCreate(string(body), a.storage, userID)
+	short, err := service.CreateService(string(body), a.storage, userID)
 	shortURL := a.cfg.DefURL + "/" + short
 	if err != nil {
 		logger.Initialize().Info(err)
@@ -146,7 +147,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	short, err := service.ServiceCreate(url.LongURL, a.storage, userID)
+	short, err := service.CreateService(url.LongURL, a.storage, userID)
 	shortURL := a.cfg.DefURL + "/" + short
 
 	if err != nil {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -13,6 +14,7 @@ import (
 
 func main() {
 	cfg := config.NewConf()
+
 	if cfg.DB != "" {
 		db, err := sql.Open("pgx", cfg.DB)
 		if err != nil {
@@ -21,7 +23,14 @@ func main() {
 		strg := storage.NewStorage(cfg.Path, db)
 
 		repo := service.NewDeleter(strg)
-		go repo.WorkerDeleteURLs()
+
+		baseCTX := context.Background()
+		ctx, cancelFunction := context.WithCancel(baseCTX)
+		defer func() {
+			cancelFunction()
+		}()
+
+		go repo.WorkerDeleteURLs(ctx)
 
 		strg.RestoreDB()
 

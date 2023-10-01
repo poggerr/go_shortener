@@ -4,9 +4,10 @@ package config
 import (
 	"flag"
 	"fmt"
+	"log"
+
 	"github.com/caarlos0/env/v8"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 // Config базовая структура конфигурации

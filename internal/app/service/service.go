@@ -3,15 +3,16 @@ package service
 import (
 	"context"
 	"fmt"
+	"math/rand"
+	"time"
+
 	"github.com/poggerr/go_shortener/internal/app/models"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/logger"
-	"math/rand"
-	"time"
 )
 
-func ServiceCreate(longURL string, strg *storage.Storage, userID string) (string, error) {
-	shortURL := Shorting(longURL)
+func CreateService(longURL string, strg *storage.Storage, userID string) (string, error) {
+	shortURL := CreateShortURL(longURL)
 	strg.Save(shortURL, longURL)
 	if strg.DB == nil {
 		return shortURL, nil
@@ -23,22 +24,22 @@ func ServiceCreate(longURL string, strg *storage.Storage, userID string) (string
 	return shortURL, nil
 }
 
-func ServiceSaveLocal(longURL string, strg *storage.Storage) string {
-	shortURL := Shorting(longURL)
+func SaveLocalService(longURL string, strg *storage.Storage) string {
+	shortURL := CreateShortURL(longURL)
 	strg.Save(shortURL, longURL)
 	return shortURL
 }
 
-func Take(shortURL string, strg *storage.Storage) (string, bool, error) {
+func Check(shortURL string, strg *storage.Storage) (string, bool, error) {
 	ans, err := strg.LongURL(shortURL)
 	if strg.DB != nil {
-		isDelete := strg.TakeLongURLIsDelete(shortURL)
+		isDelete := strg.CheckLongURLIsDelete(shortURL)
 		return ans, isDelete, err
 	}
 	return ans, false, err
 }
 
-func Shorting(longURL string) string {
+func CreateShortURL(longURL string) string {
 	if longURL == "" {
 		logger.Initialize().Error("Введите ссылку")
 		return ""
@@ -60,7 +61,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortURL := ServiceSaveLocal(v.OriginalURL, strg)
+		shortURL := SaveLocalService(v.OriginalURL, strg)
 		list[i].ShortURL = defURL + "/" + shortURL
 		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)
@@ -91,8 +92,14 @@ func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
 	return nil
 }
 
-func (r *URLRepo) WorkerDeleteURLs() {
+func (r *URLRepo) WorkerDeleteURLs(ctx context.Context) {
 	for urls := range r.urlsToDeleteChan {
-		r.repository.DeleteUrls(urls)
+		select {
+		case <-ctx.Done():
+			logger.Initialize().Info("Процесс завершился")
+			return
+		default:
+			r.repository.DeleteUrls(urls)
+		}
 	}
 }

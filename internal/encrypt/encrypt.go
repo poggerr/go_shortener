@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+
 	"github.com/poggerr/go_shortener/internal/logger"
 )
 

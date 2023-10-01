@@ -1,9 +1,10 @@
 package server
 
 import (
-	"github.com/poggerr/go_shortener/internal/logger"
 	"log"
 	"net/http"
+
+	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 func Server(addr string, hand http.Handler) {
