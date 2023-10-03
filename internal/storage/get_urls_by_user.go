@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -12,6 +13,8 @@ import (
 func (strg *Storage) GetUrlsByUserID(id *uuid.UUID, defURL string) (*models.Storage, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
+
+	id = nil
 
 	rows, err := strg.DB.QueryContext(ctx, "SELECT * FROM urls WHERE user_id=$1", id)
 	if err != nil {
@@ -31,6 +34,10 @@ func (strg *Storage) GetUrlsByUserID(id *uuid.UUID, defURL string) (*models.Stor
 
 	if err = rows.Err(); err != nil {
 		logger.Initialize().Info(err)
+	}
+
+	if len(storage) < 1 {
+		return nil, errors.New("У пользователя нет ссылок")
 	}
 
 	return &storage, nil

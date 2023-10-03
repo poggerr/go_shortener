@@ -15,7 +15,7 @@ func (a *App) GetUrlsByUser(res http.ResponseWriter, req *http.Request) {
 	strg, err := a.storage.GetUrlsByUserID(userID, a.cfg.DefURL)
 	if err != nil {
 		logger.Initialize().Info(err)
-		res.WriteHeader(http.StatusUnauthorized)
+		res.WriteHeader(http.StatusNoContent)
 		return
 	}
 
