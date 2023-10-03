@@ -27,7 +27,6 @@ func (strg *Storage) SaveToFile() {
 	if err != nil {
 		logger.Initialize().Error(err)
 	}
-
 	data, _ := json.Marshal(strg.data)
 
 	data = append(data, '\n')
