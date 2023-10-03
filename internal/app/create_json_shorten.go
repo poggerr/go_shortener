@@ -31,8 +31,9 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 
 	switch {
 	case a.storage.DB != nil:
-		shortURL, err = a.storage.SaveToDB(string(body), shortURL, userID)
+		short, err := a.storage.SaveToDB(string(body), shortURL, userID)
 		if err != nil {
+			shortURL = a.cfg.DefURL + "/" + short
 			shortenMap := make(map[string]string)
 
 			shortenMap["result"] = shortURL

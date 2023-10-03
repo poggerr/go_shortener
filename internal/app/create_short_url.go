@@ -22,11 +22,12 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 	switch {
 	case a.storage.DB != nil:
-		shortURL, err = a.storage.SaveToDB(string(body), shortURL, userID)
+		short, err := a.storage.SaveToDB(string(body), shortURL, userID)
 		if err != nil {
 			logger.Initialize().Info(err)
 			res.Header().Set("content-type", "text/plain; charset=utf-8")
 			res.WriteHeader(http.StatusConflict)
+			shortURL = a.cfg.DefURL + "/" + short
 			res.Write([]byte(shortURL))
 			return
 		}
