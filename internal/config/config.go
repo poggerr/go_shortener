@@ -18,13 +18,13 @@ type Config struct {
 	DB     string `env:"DATABASE_DSN"`
 }
 
+// NewConf конструктор конфигурации
 func NewConf() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Print("No .env file found")
 	}
 
 	var cfg Config
-
 	flag.StringVar(&cfg.Serv, "a", ":8080", "write down server")
 	flag.StringVar(&cfg.DefURL, "b", "http://localhost:8080", "write down default url")
 	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
@@ -34,6 +34,5 @@ func NewConf() *Config {
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
-
 	return &cfg
 }

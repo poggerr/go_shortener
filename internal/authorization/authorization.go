@@ -35,12 +35,12 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 }
 
 // GetUserID получение userID по токену
-func GetUserID(tokenString string) string {
+func GetUserID(tokenString string) *uuid.UUID {
 	//var secretKey = os.Getenv("SECRET_KEY")
 	var secretKey = "scdcsdc,HVJHVCAJscdJccdsJVDVJDvqwe[p[;cqsc09cah989h"
 	claims := &Claims{}
 	jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})
-	return claims.UserID.String()
+	return claims.UserID
 }

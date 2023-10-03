@@ -7,6 +7,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/logger"
 )
 
+// Server запускает сервер
 func Server(addr string, hand http.Handler) {
 
 	server := &http.Server{

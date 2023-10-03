@@ -2,25 +2,26 @@ package routers
 
 import (
 	"database/sql"
+	"github.com/poggerr/go_shortener/internal/async"
+	"github.com/poggerr/go_shortener/internal/authorization"
+	"github.com/poggerr/go_shortener/internal/middlewares"
+	"github.com/poggerr/go_shortener/internal/storage"
 	"net/http"
 	"net/http/pprof"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
-	"github.com/poggerr/go_shortener/internal/app/middlewares"
-	"github.com/poggerr/go_shortener/internal/app/service"
-	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/gzip"
 )
 
-func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service.URLRepo) chi.Router {
+func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *async.URLRepo) chi.Router {
 	r := chi.NewRouter()
 	newApp := app.NewApp(cfg, strg, db, repo)
-	r.Use(middlewares.WithLogging, gzip.GzipMiddleware)
+	r.Use(middlewares.WithLogging, gzip.GzipMiddleware, authorization.AuthMiddleware)
 	r.Post("/", newApp.CreateShortURL)
 	r.Post("/api/shorten", newApp.CreateJSONShorten)
-	r.Get("/{id}", newApp.ReadOldURL)
+	r.Get("/{id}", newApp.ReadOriginalURL)
 	r.Get("/ping", newApp.DBConnect)
 	r.Post("/api/shorten/batch", newApp.CreateBatch)
 	r.Get("/api/user/urls", newApp.GetUrlsByUser)

@@ -4,9 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/poggerr/go_shortener/internal/async"
+	"github.com/poggerr/go_shortener/internal/storage"
+
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/poggerr/go_shortener/internal/app/service"
-	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/routers"
 	"github.com/poggerr/go_shortener/internal/server"
@@ -22,7 +23,7 @@ func main() {
 		}
 		strg := storage.NewStorage(cfg.Path, db)
 
-		repo := service.NewDeleter(strg)
+		repo := async.NewDeleter(strg)
 
 		baseCTX := context.Background()
 		ctx, cancelFunction := context.WithCancel(baseCTX)

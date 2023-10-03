@@ -7,14 +7,19 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/poggerr/go_shortener/internal/async"
+	"github.com/poggerr/go_shortener/internal/storage"
 	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"runtime"
+	"runtime/pprof"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/poggerr/go_shortener/internal/app/service"
-	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/stretchr/testify/assert"
@@ -32,7 +37,7 @@ func NewDefConf() config.Config {
 
 var cfg = NewDefConf()
 var strg = storage.NewStorage("/tmp/short-url-db.json", connectDB())
-var repo = service.NewDeleter(strg)
+var repo = async.NewDeleter(strg)
 
 func connectDB() *sql.DB {
 	db, err := sql.Open("pgx", cfg.DB)
@@ -184,42 +189,56 @@ func DefaultTestRequestPost(ts *httptest.Server, method,
 	return resp, string(respBody)
 }
 
-//func Example() {
-//	baseCTX := context.Background()
-//	ctx, cancelFunction := context.WithCancel(baseCTX)
-//
-//	defer func() {
-//		fmt.Println("Main Defer: canceling context")
-//		cancelFunction()
-//	}()
-//	go repo.WorkerDeleteURLs(ctx)
-//	logger.Initialize()
-//	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
-//	defer ts.Close()
-//
-//	var testTable = []struct {
-//		api         string
-//		method      string
-//		url         string
-//		contentType string
-//		status      int
-//		location    string
-//	}{
-//		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 409},
-//		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
-//	}
-//
-//	for _, v := range testTable {
-//		switch v.api {
-//		case "/":
-//			resp, _ := DefaultTestRequestPost(ts, v.method, v.api, v.url)
-//			defer resp.Body.Close()
-//		}
-//	}
-//}
-//
-//func BenchmarkRouter(B *testing.B) {
-//	for i := 0; i < B.N; i++ {
-//		Example()
-//	}
-//}
+func Example() {
+	baseCTX := context.Background()
+	ctx, cancelFunction := context.WithCancel(baseCTX)
+
+	defer func() {
+		fmt.Println("Main Defer: canceling context")
+		cancelFunction()
+	}()
+	go repo.WorkerDeleteURLs(ctx)
+	logger.Initialize()
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
+	defer ts.Close()
+
+	var testTable = []struct {
+		api         string
+		method      string
+		url         string
+		contentType string
+		status      int
+		location    string
+	}{
+		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 201},
+		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
+	}
+
+	for _, v := range testTable {
+		switch v.api {
+		case "/":
+			resp, _ := DefaultTestRequestPost(ts, v.method, v.api, v.url)
+			read, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				log.Printf("Error ReadAll %#v\n", err)
+			}
+			fmt.Println(string(read))
+			defer resp.Body.Close()
+		}
+	}
+}
+
+func BenchmarkRouter(B *testing.B) {
+	for i := 0; i < B.N; i++ {
+		Example()
+	}
+	fmem, err := os.Create(`base.pprof`)
+	if err != nil {
+		panic(err)
+	}
+	defer fmem.Close()
+	runtime.GC()
+	if err := pprof.WriteHeapProfile(fmem); err != nil {
+		panic(err)
+	}
+}
