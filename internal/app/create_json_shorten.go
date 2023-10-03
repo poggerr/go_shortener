@@ -26,10 +26,10 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL := service_create_short_url.CreateShortURL(string(body))
-	a.storage.Save(shortURL, string(body))
+	shortURL := service_create_short_url.CreateShortURL(url.LongURL)
+	a.storage.Save(shortURL, url.LongURL)
 	if a.storage.DB != nil {
-		a.storage.SaveToDB(string(body), shortURL, userID)
+		a.storage.SaveToDB(url.LongURL, shortURL, userID)
 	}
 
 	shortURL = a.cfg.DefURL + "/" + shortURL
