@@ -16,7 +16,7 @@ import (
 )
 
 // SaveToDB сохранение ссылки в базу
-func (strg *Storage) SaveToDB(longurl, shorturl string, userID *uuid.UUID) {
+func (strg *Storage) SaveToDB(longurl, shorturl string, userID *uuid.UUID) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
@@ -29,8 +29,10 @@ func (strg *Storage) SaveToDB(longurl, shorturl string, userID *uuid.UUID) {
 			if errScan != nil {
 				logger.Initialize().Info(errScan)
 			}
+			return shorturl, err
 		}
 	}
+	return "", err
 }
 
 // SaveMultipleToDB сохранение списка ссылок

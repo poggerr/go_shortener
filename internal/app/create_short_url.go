@@ -19,18 +19,20 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 
 	shortURL := service_create_short_url.CreateShortURL(string(body))
 	a.storage.Save(shortURL, string(body))
-	if a.storage.DB != nil {
-		a.storage.SaveToDB(string(body), shortURL, userID)
+
+	switch {
+	case a.storage.DB != nil:
+		shortURL, err = a.storage.SaveToDB(string(body), shortURL, userID)
+		if err != nil {
+			logger.Initialize().Info(err)
+			res.Header().Set("content-type", "text/plain; charset=utf-8")
+			res.WriteHeader(http.StatusConflict)
+			res.Write([]byte(shortURL))
+			return
+		}
 	}
 
 	shortURL = a.cfg.DefURL + "/" + shortURL
-	if err != nil {
-		logger.Initialize().Info(err)
-		res.Header().Set("content-type", "text/plain; charset=utf-8")
-		res.WriteHeader(http.StatusConflict)
-		res.Write([]byte(shortURL))
-		return
-	}
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
