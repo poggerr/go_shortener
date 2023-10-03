@@ -17,10 +17,10 @@ type User struct {
 
 // Urls структура для получения урлов пользователя
 type Urls struct {
-	UserID      string `db:"user_id"`
+	UserID      string `db:"user_id" json:"-"`
 	LongURL     string `json:"original_url"`
 	ShortURL    string `json:"short_url"`
-	DeletedFlag bool   `db:"is_deleted"`
+	DeletedFlag bool   `db:"is_deleted" json:"-"`
 }
 
 // Storage массив структур Urls для получения списка ссылок пользователя

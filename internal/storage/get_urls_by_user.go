@@ -14,8 +14,6 @@ func (strg *Storage) GetUrlsByUserID(id *uuid.UUID, defURL string) (*models.Stor
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	id = nil
-
 	rows, err := strg.DB.QueryContext(ctx, "SELECT * FROM urls WHERE user_id=$1", id)
 	if err != nil {
 		logger.Initialize().Info(err)
