@@ -20,9 +20,11 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 	shortURL := service_create_short_url.CreateShortURL(string(body))
 	a.storage.Save(shortURL, string(body))
 
+	var short string
+
 	switch {
 	case a.storage.DB != nil:
-		shortURL, err = a.storage.SaveToDB(string(body), shortURL, userID)
+		short, err = a.storage.SaveToDB(string(body), shortURL, userID)
 		if err != nil {
 			logger.Initialize().Info(err)
 			res.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -32,7 +34,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	shortURL = a.cfg.DefURL + "/" + shortURL
+	shortURL = a.cfg.DefURL + "/" + short
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
 
