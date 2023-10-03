@@ -210,7 +210,7 @@ func Example() {
 		status      int
 		location    string
 	}{
-		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 201},
+		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 409},
 		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
 	}
 
