@@ -41,12 +41,10 @@ func main() {
 		server.Server(cfg.Serv, r)
 
 	} else {
-
 		strg := storage.NewStorage(cfg.Path, nil)
 		if cfg.Path != "" {
 			strg.RestoreFromFile()
 		}
-
 		r := routers.Router(cfg, strg, nil, nil)
 		server.Server(cfg.Serv, r)
 	}
