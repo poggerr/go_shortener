@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/logger"
-	"github.com/poggerr/go_shortener/internal/serviceCreateShortURL"
+	"github.com/poggerr/go_shortener/internal/servicecreateshorturl"
 	"io"
 	"net/http"
 )
@@ -17,7 +17,7 @@ func (a *App) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	shortURL := serviceCreateShortURL.CreateShortURL(string(body))
+	shortURL := servicecreateshorturl.CreateShortURL(string(body))
 	a.storage.Save(shortURL, string(body))
 
 	switch {

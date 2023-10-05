@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/poggerr/go_shortener/internal/models"
-	"github.com/poggerr/go_shortener/internal/serviceCreateShortURL"
+	"github.com/poggerr/go_shortener/internal/servicecreateshorturl"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
@@ -44,7 +44,7 @@ func (strg *Storage) SaveMultipleToDB(list models.BatchList, defURL string) mode
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortURL := serviceCreateShortURL.CreateShortURL(v.OriginalURL)
+		shortURL := servicecreateshorturl.CreateShortURL(v.OriginalURL)
 		strg.Save(shortURL, v.OriginalURL)
 		list[i].ShortURL = defURL + "/" + shortURL
 		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)

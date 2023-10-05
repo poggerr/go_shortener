@@ -1,4 +1,4 @@
-package serviceCreateShortURL
+package servicecreateshorturl
 
 import (
 	"math/rand"
