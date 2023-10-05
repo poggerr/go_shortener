@@ -35,7 +35,7 @@ func (strg *Storage) GetUrlsByUserID(id *uuid.UUID, defURL string) (*models.Stor
 	}
 
 	if len(storage) < 1 {
-		return nil, errors.New("У пользователя нет ссылок")
+		return nil, errors.New("у пользователя нет ссылок")
 	}
 
 	return &storage, nil

@@ -5,7 +5,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/poggerr/go_shortener/internal/models"
-	"github.com/poggerr/go_shortener/internal/service_create_short_url"
+	"github.com/poggerr/go_shortener/internal/serviceCreateShortURL"
 	"io"
 	"net/http"
 )
@@ -26,7 +26,7 @@ func (a *App) CreateJSONShorten(res http.ResponseWriter, req *http.Request) {
 		logger.Initialize().Info(err)
 	}
 
-	shortURL := service_create_short_url.CreateShortURL(url.LongURL)
+	shortURL := serviceCreateShortURL.CreateShortURL(url.LongURL)
 	a.storage.Save(shortURL, url.LongURL)
 
 	switch {

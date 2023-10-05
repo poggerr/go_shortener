@@ -10,13 +10,8 @@ import (
 	"github.com/poggerr/go_shortener/internal/async"
 	"github.com/poggerr/go_shortener/internal/storage"
 	"io"
-	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
-	"runtime"
-	"runtime/pprof"
 	"testing"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -41,7 +36,12 @@ var repo = async.NewDeleter(strg)
 
 func connectDB() *sql.DB {
 	db, err := sql.Open("pgx", cfg.DB)
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			logger.Initialize().Error("Ошибка при закрытии БД ", err)
+		}
+	}(db)
 	if err != nil {
 		logger.Initialize().Error("Ошибка при подключении к БД ", err)
 	}
@@ -218,11 +218,6 @@ func Example() {
 		switch v.api {
 		case "/":
 			resp, _ := DefaultTestRequestPost(ts, v.method, v.api, v.url)
-			read, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				log.Printf("Error ReadAll %#v\n", err)
-			}
-			fmt.Println(string(read))
 			defer resp.Body.Close()
 		}
 	}
@@ -231,14 +226,5 @@ func Example() {
 func BenchmarkRouter(B *testing.B) {
 	for i := 0; i < B.N; i++ {
 		Example()
-	}
-	fmem, err := os.Create(`result.pprof`)
-	if err != nil {
-		panic(err)
-	}
-	defer fmem.Close()
-	runtime.GC()
-	if err := pprof.WriteHeapProfile(fmem); err != nil {
-		panic(err)
 	}
 }
