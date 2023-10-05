@@ -15,7 +15,6 @@ import (
 
 func main() {
 	cfg := config.NewConf()
-
 	if cfg.DB != "" {
 		db, err := sql.Open("pgx", cfg.DB)
 		if err != nil {
