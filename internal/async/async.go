@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/google/uuid"
 
-	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/poggerr/go_shortener/internal/storage"
 )
 
@@ -28,12 +27,6 @@ func (r *URLRepo) DeleteAsync(ids []string, userID *uuid.UUID) error {
 // WorkerDeleteURLs воркер удаления ссылок
 func (r *URLRepo) WorkerDeleteURLs(ctx context.Context) {
 	for urls := range r.urlsToDeleteChan {
-		select {
-		case <-ctx.Done():
-			logger.Initialize().Info("Процесс завершился")
-			return
-		default:
-			r.repository.DeleteUrls(urls)
-		}
+		r.repository.DeleteUrls(urls)
 	}
 }
