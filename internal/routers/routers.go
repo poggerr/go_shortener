@@ -12,13 +12,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
 	"github.com/poggerr/go_shortener/internal/config"
-	"github.com/poggerr/go_shortener/internal/gzip"
 )
 
 func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *async.URLRepo) chi.Router {
 	r := chi.NewRouter()
 	newApp := app.NewApp(cfg, strg, db, repo)
-	r.Use(middlewares.WithLogging, gzip.GzipMiddleware, authorization.AuthMiddleware)
+	r.Use(middlewares.WithLogging, authorization.AuthMiddleware)
 	r.Post("/", newApp.CreateShortURL)
 	r.Post("/api/shorten", newApp.CreateJSONShorten)
 	r.Get("/{id}", newApp.ReadOriginalURL)

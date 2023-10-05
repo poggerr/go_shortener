@@ -232,7 +232,7 @@ func BenchmarkRouter(B *testing.B) {
 	for i := 0; i < B.N; i++ {
 		Example()
 	}
-	fmem, err := os.Create(`base.pprof`)
+	fmem, err := os.Create(`result.pprof`)
 	if err != nil {
 		panic(err)
 	}
