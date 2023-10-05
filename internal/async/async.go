@@ -27,6 +27,11 @@ func (r *URLRepo) DeleteAsync(ids []string, userID *uuid.UUID) error {
 // WorkerDeleteURLs воркер удаления ссылок
 func (r *URLRepo) WorkerDeleteURLs(ctx context.Context) {
 	for urls := range r.urlsToDeleteChan {
-		r.repository.DeleteUrls(urls)
+		select {
+		case <-ctx.Done():
+			return
+		default:
+			r.repository.DeleteUrls(urls)
+		}
 	}
 }
