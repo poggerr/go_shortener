@@ -1,3 +1,4 @@
+// Package authorization содержит код для авторизации пользователя
 package authorization
 
 import (
@@ -18,6 +19,7 @@ type Claims struct {
 
 const TokenExp = time.Hour * 3
 
+// BuildJWTString создание JWT
 func BuildJWTString(uuid *uuid.UUID) (string, error) {
 
 	var secretKey = os.Getenv("SECRET_KEY")
@@ -35,6 +37,7 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 	return tokenString, nil
 }
 
+// GetUserID получение userID по токену
 func GetUserID(tokenString string) string {
 	//var secretKey = os.Getenv("SECRET_KEY")
 	var secretKey = "scdcsdc,HVJHVCAJscdJccdsJVDVJDvqwe[p[;cqsc09cah989h"
@@ -45,6 +48,7 @@ func GetUserID(tokenString string) string {
 	return claims.UserID.String()
 }
 
+// RegisterUser Регистрация пользователя. На данный момент не используется в проекте
 func RegisterUser(strg *storage.Storage, user *models.User) {
 	user.Pass = encrypt.Encrypt(user.Pass)
 	id := uuid.New()

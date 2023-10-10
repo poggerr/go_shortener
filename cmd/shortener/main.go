@@ -39,6 +39,7 @@ func main() {
 		}
 		r := routers.Router(cfg, strg, db, repo)
 		server.Server(cfg.Serv, r)
+
 	} else {
 
 		strg := storage.NewStorage(cfg.Path, nil)

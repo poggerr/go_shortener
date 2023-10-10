@@ -9,6 +9,8 @@ import (
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/gzip"
+	"net/http"
+	"net/http/pprof"
 )
 
 func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service.URLRepo) chi.Router {
@@ -22,5 +24,12 @@ func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *service
 	r.Post("/api/shorten/batch", newApp.CreateBatch)
 	r.Get("/api/user/urls", newApp.GetUrlsByUser)
 	r.Delete("/api/user/urls", newApp.DeleteUrls)
+
+	r.Handle("/debug/pprof/", http.HandlerFunc(pprof.Index))
+	r.Handle("/debug/pprof/cmdline", http.HandlerFunc(pprof.Cmdline))
+	r.Handle("/debug/pprof/profile", http.HandlerFunc(pprof.Profile))
+	r.Handle("/debug/pprof/symbol", http.HandlerFunc(pprof.Symbol))
+	r.Handle("/debug/pprof/trace", http.HandlerFunc(pprof.Trace))
+	r.Handle("/debug/pprof/{cmd}", http.HandlerFunc(pprof.Index))
 	return r
 }

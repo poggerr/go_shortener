@@ -1,0 +1,274 @@
+### Create URL
+POST localhost:8080/
+Content-Type: text/plain
+
+https://practicum.yandex.ru
+
+###
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.google.com"
+}
+
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.gogle.com"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.ggle.com"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yandex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#####
+POST localhost:8080/api/shorten
+Content-Type: application/json
+
+{
+  "url": "https://www.yanex.ru"
+}
+
+#### get db connect
+GET localhost:8080/ping
+#### get db connect
+GET localhost:8080/ping
+#### get db connect
+GET localhost:8080/ping
+#### get db connect
+GET localhost:8080/ping
+#### get db connect
+GET localhost:8080/ping
+

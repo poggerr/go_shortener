@@ -1,0 +1,10 @@
+#ci:
+#	golangci-lint run
+
+
+#build:
+#	cd cmd/shortener && go build -o shortener
+
+
+run:
+	cd cmd/shortener && go build -o shortener && ./shortener -d="host=localhost user=shortener password=password dbname=shortener sslmode=disable"
