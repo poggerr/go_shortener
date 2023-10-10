@@ -2,17 +2,18 @@ package routers
 
 import (
 	"database/sql"
-	"github.com/poggerr/go_shortener/internal/async"
-	"github.com/poggerr/go_shortener/internal/authorization"
-	"github.com/poggerr/go_shortener/internal/gzip"
-	"github.com/poggerr/go_shortener/internal/middlewares"
-	"github.com/poggerr/go_shortener/internal/storage"
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/app"
+	"github.com/poggerr/go_shortener/internal/async"
+	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/gzip"
+	"github.com/poggerr/go_shortener/internal/middlewares"
+	"github.com/poggerr/go_shortener/internal/storage"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func Router(cfg *config.Config, strg *storage.Storage, db *sql.DB, repo *async.URLRepo) chi.Router {

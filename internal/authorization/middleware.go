@@ -2,10 +2,12 @@ package authorization
 
 import (
 	"context"
-	"github.com/google/uuid"
-	"github.com/poggerr/go_shortener/internal/logger"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+
+	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 // AuthMiddleware мидлваря авторизации

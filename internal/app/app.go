@@ -2,6 +2,7 @@ package app
 
 import (
 	"database/sql"
+
 	"github.com/poggerr/go_shortener/internal/async"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/storage"

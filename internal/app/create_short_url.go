@@ -1,11 +1,12 @@
 package app
 
 import (
+	"io"
+	"net/http"
+
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/poggerr/go_shortener/internal/servicecreateshorturl"
-	"io"
-	"net/http"
 )
 
 // CreateShortURL хендлер создания короткой ссылки

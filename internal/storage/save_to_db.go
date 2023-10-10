@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/poggerr/go_shortener/internal/models"
 	"github.com/poggerr/go_shortener/internal/servicecreateshorturl"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 // SaveToDB сохранение ссылки в базу

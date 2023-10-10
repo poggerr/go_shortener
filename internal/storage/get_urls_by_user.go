@@ -5,9 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/poggerr/go_shortener/internal/logger"
 	"github.com/poggerr/go_shortener/internal/models"
+
+	"github.com/google/uuid"
 )
 
 func (strg *Storage) GetUrlsByUserID(id *uuid.UUID, defURL string) (*models.Storage, error) {

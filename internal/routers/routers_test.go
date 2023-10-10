@@ -7,16 +7,17 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"github.com/poggerr/go_shortener/internal/async"
-	"github.com/poggerr/go_shortener/internal/storage"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/poggerr/go_shortener/internal/async"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
+	"github.com/poggerr/go_shortener/internal/storage"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
