@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/poggerr/go_shortener/internal/app/service"
 	"github.com/poggerr/go_shortener/internal/app/storage"
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/logger"
@@ -31,6 +32,7 @@ func NewDefConf() config.Config {
 
 var cfg = NewDefConf()
 var strg = storage.NewStorage("/tmp/short-url-db.json", connectDB())
+var repo = service.NewDeleter(strg)
 
 func connectDB() *sql.DB {
 	db, err := sql.Open("pgx", cfg.DB)
@@ -74,8 +76,9 @@ func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, lon
 }
 
 func TestHandlersPost(t *testing.T) {
+	go repo.WorkerDeleteURLs()
 	logger.Initialize()
-	ts := httptest.NewServer(Router(&cfg, strg, strg.DB))
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
 	defer ts.Close()
 
 	var testTable = []struct {
@@ -115,8 +118,9 @@ func TestHandlersPost(t *testing.T) {
 }
 
 func TestGzipCompression(t *testing.T) {
+	go repo.WorkerDeleteURLs()
 	logger.Initialize()
-	ts := httptest.NewServer(Router(&cfg, strg, strg.DB))
+	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
 	defer ts.Close()
 
 	fmt.Println("/")

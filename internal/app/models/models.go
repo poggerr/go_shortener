@@ -1,6 +1,8 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+)
 
 type BatchList []struct {
 	CorrelationID string `json:"correlation_id"`
@@ -14,16 +16,20 @@ type URL struct {
 }
 
 type User struct {
-	Id       *uuid.UUID `json:"id"`
+	ID       *uuid.UUID `json:"id"`
 	UserName string     `json:"username"`
 	Pass     string     `json:"pass"`
 }
 
 type Urls struct {
-	UserId      string `db:"user_id"`
+	UserID      string `db:"user_id"`
 	LongURL     string `json:"original_url"`
 	ShortURL    string `json:"short_url"`
 	DeletedFlag bool   `db:"is_deleted"`
+}
+
+type Keys []struct {
+	Key string `json:"key"`
 }
 
 type Storage []Urls

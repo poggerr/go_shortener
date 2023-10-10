@@ -10,30 +10,32 @@ import (
 	"time"
 )
 
-func ServiceCreate(longURL, defURL string, strg *storage.Storage, userId string) (string, error) {
+func ServiceCreate(longURL string, strg *storage.Storage, userID string) (string, error) {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
-	shortURL = defURL + "/" + shortURL
 	if strg.DB == nil {
 		return shortURL, nil
 	}
-	ans, err := strg.SaveToDB(longURL, shortURL, userId)
+	ans, err := strg.SaveToDB(longURL, shortURL, userID)
 	if err != nil {
 		return ans, err
 	}
 	return shortURL, nil
 }
 
-func ServiceSaveLocal(longURL, defURL string, strg *storage.Storage) string {
+func ServiceSaveLocal(longURL string, strg *storage.Storage) string {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
-	shortURL = defURL + "/" + shortURL
 	return shortURL
 }
 
-func Take(shortURL string, strg *storage.Storage) (string, error) {
+func Take(shortURL string, strg *storage.Storage) (string, bool, error) {
 	ans, err := strg.LongURL(shortURL)
-	return ans, err
+	if strg.DB != nil {
+		isDelete := strg.TakeLongURLIsDelete(shortURL)
+		return ans, isDelete, err
+	}
+	return ans, false, err
 }
 
 func Shorting(longURL string) string {
@@ -58,8 +60,8 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 		logger.Initialize().Error(err)
 	}
 	for i, v := range list {
-		shortURL := ServiceSaveLocal(v.OriginalURL, defURL, strg)
-		list[i].ShortURL = shortURL
+		shortURL := ServiceSaveLocal(v.OriginalURL, strg)
+		list[i].ShortURL = defURL + "/" + shortURL
 		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)
 		if err != nil {
@@ -70,4 +72,28 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 	tx.Commit()
 	return list
 
+}
+
+type URLRepo struct {
+	urlsToDeleteChan chan storage.UserURLs
+	repository       storage.Storage
+}
+
+func NewDeleter(strg *storage.Storage) *URLRepo {
+	return &URLRepo{
+		urlsToDeleteChan: make(chan storage.UserURLs, 10),
+		repository:       *strg,
+	}
+}
+
+func (r *URLRepo) DeleteAsync(ids []string, userID string) error {
+	r.urlsToDeleteChan <- storage.UserURLs{UserID: userID, URLs: ids}
+	return nil
+}
+
+// Пришем воркер, который крутится и читает канал
+func (r *URLRepo) WorkerDeleteURLs() {
+	for urls := range r.urlsToDeleteChan {
+		r.repository.DeleteUrls(urls)
+	}
 }
