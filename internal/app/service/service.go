@@ -10,14 +10,14 @@ import (
 	"time"
 )
 
-func ServiceCreate(longURL, defURL string, strg *storage.Storage) (string, error) {
+func ServiceCreate(longURL, defURL string, strg *storage.Storage, userId string) (string, error) {
 	shortURL := Shorting(longURL)
 	strg.Save(shortURL, longURL)
 	shortURL = defURL + "/" + shortURL
 	if strg.DB == nil {
 		return shortURL, nil
 	}
-	ans, err := strg.SaveToDB(longURL, shortURL)
+	ans, err := strg.SaveToDB(longURL, shortURL, userId)
 	if err != nil {
 		return ans, err
 	}
@@ -60,7 +60,7 @@ func SaveMultipleToDB(list models.BatchList, strg *storage.Storage, defURL strin
 	for i, v := range list {
 		shortURL := ServiceSaveLocal(v.OriginalURL, defURL, strg)
 		list[i].ShortURL = shortURL
-		query := fmt.Sprintf("INSERT INTO urls (correlation_id, longurl, shorturl) VALUES('%s', '%s', '%s')", v.CorrelationID, v.OriginalURL, shortURL)
+		query := fmt.Sprintf("INSERT INTO urls (long_url, short_url) VALUES('%s', '%s')", v.OriginalURL, shortURL)
 		_, err = tx.ExecContext(ctx, query)
 		if err != nil {
 			tx.Rollback()
