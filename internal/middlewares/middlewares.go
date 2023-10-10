@@ -2,10 +2,10 @@
 package middlewares
 
 import (
-	"fmt"
-	"github.com/poggerr/go_shortener/internal/logger"
 	"net/http"
 	"time"
+
+	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 // WithLogging Логирование каждого запроса
@@ -30,17 +30,4 @@ func WithLogging(h http.Handler) http.Handler {
 		)
 	}
 	return http.HandlerFunc(logFn)
-}
-
-func WithCookies(h http.Handler) http.Handler {
-	fn := func(res http.ResponseWriter, req *http.Request) {
-		c, err := req.Cookie("session_token")
-		if err != nil {
-			logger.Initialize().Info("Ошибка при получении Cookie ", err)
-		}
-
-		fmt.Println(c)
-
-	}
-	return http.HandlerFunc(fn)
 }

@@ -3,20 +3,23 @@ package routers
 import (
 	"bytes"
 	"compress/gzip"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	_ "github.com/jackc/pgx/v5/stdlib"
-	"github.com/poggerr/go_shortener/internal/app/service"
-	"github.com/poggerr/go_shortener/internal/app/storage"
-	"github.com/poggerr/go_shortener/internal/config"
-	"github.com/poggerr/go_shortener/internal/logger"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/poggerr/go_shortener/internal/async"
+	"github.com/poggerr/go_shortener/internal/config"
+	"github.com/poggerr/go_shortener/internal/logger"
+	"github.com/poggerr/go_shortener/internal/storage"
+
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func NewDefConf() config.Config {
@@ -24,20 +27,25 @@ func NewDefConf() config.Config {
 		Serv:   ":8080",
 		DefURL: "http://localhost:8080",
 		Path:   "/tmp/short-url-db3.json",
-		DB:     "host=localhost user=username password=userpassword dbname=shortener sslmode=disable",
+		DB:     "host=localhost user=shortener password=password dbname=shortener sslmode=disable",
 	}
 }
 
 var cfg = NewDefConf()
 var strg = storage.NewStorage("/tmp/short-url-db.json", connectDB())
-var repo = service.NewDeleter(strg)
+var repo = async.NewDeleter(strg)
 
 func connectDB() *sql.DB {
 	db, err := sql.Open("pgx", cfg.DB)
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			logger.Initialize().Error("Ошибка при закрытии БД ", err)
+		}
+	}(db)
 	if err != nil {
 		logger.Initialize().Error("Ошибка при подключении к БД ", err)
 	}
-	defer db.Close()
 	return db
 }
 
@@ -74,7 +82,13 @@ func testRequestJSON(t *testing.T, ts *httptest.Server, method, path string, lon
 }
 
 func TestHandlersPost(t *testing.T) {
-	go repo.WorkerDeleteURLs()
+	baseCTX := context.Background()
+	ctx, cancelFunction := context.WithCancel(baseCTX)
+
+	defer func() {
+		cancelFunction()
+	}()
+	go repo.WorkerDeleteURLs(ctx)
 	logger.Initialize()
 	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
 	defer ts.Close()
@@ -116,12 +130,16 @@ func TestHandlersPost(t *testing.T) {
 }
 
 func TestGzipCompression(t *testing.T) {
-	go repo.WorkerDeleteURLs()
+	baseCTX := context.Background()
+	ctx, cancelFunction := context.WithCancel(baseCTX)
+
+	defer func() {
+		cancelFunction()
+	}()
+	go repo.WorkerDeleteURLs(ctx)
 	logger.Initialize()
 	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
 	defer ts.Close()
-
-	fmt.Println("/")
 
 	requestBody := `{
         "url": "https://yan.ru/"
@@ -173,7 +191,14 @@ func DefaultTestRequestPost(ts *httptest.Server, method,
 }
 
 func Example() {
-	go repo.WorkerDeleteURLs()
+	baseCTX := context.Background()
+	ctx, cancelFunction := context.WithCancel(baseCTX)
+
+	defer func() {
+		fmt.Println("Main Defer: canceling context")
+		cancelFunction()
+	}()
+	go repo.WorkerDeleteURLs(ctx)
 	logger.Initialize()
 	ts := httptest.NewServer(Router(&cfg, strg, strg.DB, repo))
 	defer ts.Close()
@@ -186,8 +211,8 @@ func Example() {
 		status      int
 		location    string
 	}{
-		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 409},
-		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 409},
+		{api: "/", method: "POST", url: "https://prabicum.yandex.ru/", contentType: "text/plain; charset=utf-8", status: 201},
+		{api: "/", method: "POST", url: "https://www.gjle.com/", contentType: "text/plain; charset=utf-8", status: 201},
 	}
 
 	for _, v := range testTable {
@@ -196,5 +221,11 @@ func Example() {
 			resp, _ := DefaultTestRequestPost(ts, v.method, v.api, v.url)
 			defer resp.Body.Close()
 		}
+	}
+}
+
+func BenchmarkRouter(B *testing.B) {
+	for i := 0; i < B.N; i++ {
+		Example()
 	}
 }

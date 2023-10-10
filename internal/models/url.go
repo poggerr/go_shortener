@@ -1,16 +1,6 @@
-// Package models содержит все модели проекта
 package models
 
-import (
-	"github.com/google/uuid"
-)
-
-// BatchList структура для сохранения нескольких ссылок
-type BatchList []struct {
-	CorrelationID string `json:"correlation_id"`
-	OriginalURL   string `json:"original_url"`
-	ShortURL      string `json:"short_url"`
-}
+import "github.com/google/uuid"
 
 // URL структура для обозначения короткой и длинной ссылки
 type URL struct {
@@ -27,16 +17,11 @@ type User struct {
 
 // Urls структура для получения урлов пользователя
 type Urls struct {
-	UserID      string `db:"user_id"`
+	UserID      string `db:"user_id" json:"-"`
 	LongURL     string `json:"original_url"`
 	ShortURL    string `json:"short_url"`
-	DeletedFlag bool   `db:"is_deleted"`
+	DeletedFlag bool   `db:"is_deleted" json:"-"`
 }
 
 // Storage массив структур Urls для получения списка ссылок пользователя
 type Storage []Urls
-
-// Keys структура для загрузки коротких ссылок для удаления в бд
-type Keys []struct {
-	Key string `json:"key"`
-}

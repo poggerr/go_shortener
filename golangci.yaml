@@ -26,7 +26,7 @@ linters-settings:
     check-exported: true
 
 linters:
-  disable-all: true
+  disable-all: false
   enable:
     - govet
     - errcheck
