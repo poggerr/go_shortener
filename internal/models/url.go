@@ -24,4 +24,4 @@ type Urls struct {
 }
 
 // Storage массив структур Urls для получения списка ссылок пользователя
-type Storage []Urls
+type UserStorage []Urls

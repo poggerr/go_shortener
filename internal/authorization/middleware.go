@@ -2,12 +2,11 @@ package authorization
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-
-	"github.com/poggerr/go_shortener/internal/logger"
 )
 
 // AuthMiddleware мидлваря авторизации
@@ -20,7 +19,7 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			uuidUserID := uuid.New()
 			jwtString, err := BuildJWTString(&uuidUserID)
 			if err != nil {
-				logger.Initialize().Info(err)
+				fmt.Println(err.Error())
 			}
 
 			cook := &http.Cookie{

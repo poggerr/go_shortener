@@ -2,52 +2,61 @@ package main
 
 import (
 	"context"
-	"database/sql"
-	"fmt"
-
-	"github.com/poggerr/go_shortener/internal/async"
-	"github.com/poggerr/go_shortener/internal/config"
-	"github.com/poggerr/go_shortener/internal/routers"
+	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/server"
-	"github.com/poggerr/go_shortener/internal/storage"
+	"github.com/rs/zerolog/log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/poggerr/go_shortener/internal/config"
+)
+
+var (
+	cfg  *config.Config
+	repo handlers.Repository
 )
 
 func main() {
-	cfg := config.NewConf()
-	if cfg.DB != "" {
-		db, err := sql.Open("pgx", cfg.DB)
+	srv := CreateServer()
+	Run(srv)
+}
+
+func CreateServer() *http.Server {
+	return server.Server(cfg.Serv, cfg.DefURL, repo)
+}
+
+func Run(srv *http.Server) {
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
+	go func() {
+		err := srv.ListenAndServe()
+		if err != nil && err != http.ErrServerClosed {
+			log.Fatal().Msgf("listen: %+v\n", err)
+		}
+		log.Info().Msg("Server started")
+	}()
+
+	<-ctx.Done()
+
+	log.Info().Msg("Server stopped")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer func() {
+		err := repo.Close()
 		if err != nil {
-			fmt.Println(err.Error())
+			log.Error().Msgf("Caught an error due closing repository:%+v", err)
 		}
-		strg := storage.NewStorage(cfg.Path, db)
 
-		repo := async.NewDeleter(strg)
-
-		baseCTX := context.Background()
-		ctx, cancelFunction := context.WithCancel(baseCTX)
-		defer func() {
-			cancelFunction()
-		}()
-
-		go repo.WorkerDeleteURLs(ctx)
-
-		strg.RestoreDB()
-
-		if cfg.Path != "" {
-			strg.RestoreFromFile()
-		}
-		r := routers.Router(cfg, strg, db, repo)
-		server.Server(cfg.Serv, r)
-
-	} else {
-		strg := storage.NewStorage(cfg.Path, nil)
-		if cfg.Path != "" {
-			strg.RestoreFromFile()
-		}
-		r := routers.Router(cfg, strg, nil, nil)
-		server.Server(cfg.Serv, r)
+		log.Info().Msg("Everything is closed properly")
+		cancel()
+	}()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Error().Msgf("Server Shutdown Failed:%+v", err)
 	}
-
+	stop()
+	log.Info().Msg("Server exited properly")
 }
