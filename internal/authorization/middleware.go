@@ -54,6 +54,10 @@ func NewContext(ctx context.Context, user *uuid.UUID) context.Context {
 }
 
 func FromContext(ctx context.Context) *uuid.UUID {
-	u := ctx.Value(ReqUserKey).(*uuid.UUID)
-	return u
+	u := ctx.Value(ReqUserKey)
+	if u != nil {
+		return u.(*uuid.UUID)
+	}
+	id := uuid.New()
+	return &id
 }

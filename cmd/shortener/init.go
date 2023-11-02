@@ -6,6 +6,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/storage/database"
 	"github.com/poggerr/go_shortener/internal/storage/file"
+	"github.com/poggerr/go_shortener/internal/storage/memory"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"os"
@@ -49,7 +50,7 @@ func initRepository() {
 			return
 		}
 	}
-	//
-	//repo = memory.NewStorage()
-	//log.Info().Msg("In memory storage will be used")
+
+	repo = memory.NewStorage()
+	log.Info().Msg("In memory storage will be used")
 }

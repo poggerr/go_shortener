@@ -7,8 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/models"
+	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
 	"io"
 	"os"
@@ -22,7 +22,7 @@ type Storage struct {
 	mx            sync.Mutex
 }
 
-var _ handlers.Repository = (*Storage)(nil)
+var _ service.URLShortenerService = (*Storage)(nil)
 
 // NewStorage cоздаёт и возвращает экземпляр Storage
 func NewStorage(filename string) (fs *Storage, err error) {

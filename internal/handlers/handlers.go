@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/models"
+	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
 	"github.com/rs/zerolog/log"
 	"io"
@@ -16,13 +16,13 @@ import (
 )
 
 type URLShortener struct {
-	linkRepo Repository
+	linkRepo service.URLShortenerService
 	baseURL  string
 }
 
 // NewURLShortener создает URLShortener и инициализирует его адресом, по которому будут доступны методы,
 // и репозиторием хранения ссылок.
-func NewURLShortener(base string, repo Repository) *URLShortener {
+func NewURLShortener(base string, repo service.URLShortenerService) *URLShortener {
 	hand := URLShortener{}
 	hand.linkRepo = repo
 	hand.baseURL = base
@@ -33,6 +33,9 @@ func NewURLShortener(base string, repo Repository) *URLShortener {
 // CreateShortURL хендлер создания короткой ссылки
 func (a *URLShortener) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 	userID := authorization.FromContext(req.Context())
+	if userID == nil {
+		fmt.Println("cdscdssdc")
+	}
 
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -236,22 +239,4 @@ func (a *URLShortener) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 	a.linkRepo.Delete(ctx, userID, keys)
 
 	res.WriteHeader(http.StatusAccepted)
-}
-
-type Repository interface {
-	// Store сохраняет оригинальную ссылку и возвращает id (токен) сокращенного варианта.
-	Store(ctx context.Context, user *uuid.UUID, longURL string) (id string, err error)
-	// Restore возвращает оригинальную ссылку по его id.
-	Restore(ctx context.Context, id string) (link string, err error)
-	// Delete - помечает ссылки удаленными.
-	// Согласно заданию - результат работы пользователю не возвращается.
-	Delete(ctx context.Context, user *uuid.UUID, ids []string)
-	// GetUserStorage возвращает массив всех ранее сокращенных пользователей ссылок.
-	GetUserStorage(ctx context.Context, user *uuid.UUID, defURL string) (map[string]string, error)
-	// StoreBatch сохраняет пакет ссылок в хранилище и возвращает список пакет id.
-	StoreBatch(ctx context.Context, user *uuid.UUID, batchIn models.BatchList, defURL string) (models.BatchList, error)
-	// Ping проверяет готовность к работе репозитория.
-	Ping(context.Context) error
-	// Close завершает работу репозитория в стиле graceful shutdown.
-	Close() error
 }

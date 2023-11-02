@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/server"
+	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
@@ -17,7 +17,7 @@ import (
 
 var (
 	cfg  *config.Config
-	repo handlers.Repository
+	repo service.URLShortenerService
 )
 
 func main() {

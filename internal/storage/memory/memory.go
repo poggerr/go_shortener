@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/uuid"
-	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/models"
+	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
 	"sync"
 )
@@ -17,7 +17,7 @@ type Storage struct {
 	mx      sync.Mutex
 }
 
-var _ handlers.Repository = (*Storage)(nil)
+var _ service.URLShortenerService = (*Storage)(nil)
 
 // NewStorage cоздает и возвращает экземпляр Storage
 func NewStorage() *Storage {
@@ -41,12 +41,14 @@ func (s *Storage) Store(ctx context.Context, user *uuid.UUID, link string) (id s
 	}
 
 	s.storage[user.String()][id] = link
+	fmt.Println(s.storage)
 	return id, nil
 }
 
 // isExist проверяет наличие id в сторадже
 func (s *Storage) isExist(_ context.Context, id string) bool {
 	for _, user := range s.storage {
+		fmt.Println(user)
 		_, ok := user[id]
 		if ok {
 			return true

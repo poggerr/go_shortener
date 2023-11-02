@@ -8,8 +8,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/models"
+	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
 	"time"
 )
@@ -21,7 +21,7 @@ type Storage struct {
 	delBatch chan userID
 }
 
-var _ handlers.Repository = (*Storage)(nil)
+var _ service.URLShortenerService = (*Storage)(nil)
 
 func NewStorage(db *sql.DB) (*Storage, error) {
 	tx, err := db.Begin()
