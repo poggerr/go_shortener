@@ -33,9 +33,6 @@ func NewURLShortener(base string, repo service.URLShortenerService) *URLShortene
 // CreateShortURL хендлер создания короткой ссылки
 func (a *URLShortener) CreateShortURL(res http.ResponseWriter, req *http.Request) {
 	userID := authorization.FromContext(req.Context())
-	if userID == nil {
-		fmt.Println("cdscdssdc")
-	}
 
 	body, err := io.ReadAll(req.Body)
 	if err != nil {
@@ -142,6 +139,7 @@ func (a *URLShortener) CreateJSONShorten(res http.ResponseWriter, req *http.Requ
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	res.Header().Set("content-type", "application/json ")
 	shortURL, err := a.linkRepo.Store(ctx, userID, url.LongURL)
 	switch err {
 	case nil:
@@ -160,8 +158,6 @@ func (a *URLShortener) CreateJSONShorten(res http.ResponseWriter, req *http.Requ
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
-	res.Header().Set("content-type", "application/json ")
 	res.Write(marshal)
 
 }

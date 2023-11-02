@@ -37,7 +37,7 @@ func initRepository() {
 	if db != nil {
 		repo, err = database.NewStorage(db)
 		if err == nil {
-			log.Info().Msg("In file storage will be used")
+			log.Info().Msg("In db storage will be used")
 			return
 		}
 	}
