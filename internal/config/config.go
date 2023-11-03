@@ -28,10 +28,11 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.DB, "d", "", "write down db")
 	flag.Parse()
 
-	fmt.Println(cfg.Path)
-
 	if err := env.Parse(&cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
+
+	fmt.Println(cfg.Path)
+
 	return cfg
 }
