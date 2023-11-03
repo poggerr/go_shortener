@@ -28,7 +28,7 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.DB, "d", "", "write down db")
 	flag.Parse()
 
-	if err := env.Parse(&cfg); err != nil {
+	if err := env.Parse(cfg); err != nil {
 		fmt.Println("err Parse")
 		fmt.Printf("%+v\n", err)
 	}
