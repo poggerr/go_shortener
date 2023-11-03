@@ -29,6 +29,7 @@ func NewConf() *Config {
 	flag.Parse()
 
 	if err := env.Parse(&cfg); err != nil {
+		fmt.Println("err Parse")
 		fmt.Printf("%+v\n", err)
 	}
 
