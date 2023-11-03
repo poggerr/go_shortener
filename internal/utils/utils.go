@@ -24,7 +24,7 @@ func CheckFilename(filename string) (err error) {
 
 	// Attempt to create it
 	var d []byte
-	if err = os.WriteFile(filename, d, 0644); err == nil {
+	if err = os.WriteFile(filename, d, 0666); err == nil {
 		err = os.Remove(filename) // And delete it
 		if err != nil {
 			return err
