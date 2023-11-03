@@ -14,6 +14,7 @@ require (
 	github.com/matoous/go-nanoid/v2 v2.0.0
 	github.com/rs/zerolog v1.31.0
 	github.com/stretchr/testify v1.8.4
+	golang.org/x/sync v0.3.0
 	golang.org/x/tools v0.12.1-0.20230825192346-2191a27a6dc5
 	honnef.co/go/tools v0.4.6
 )
