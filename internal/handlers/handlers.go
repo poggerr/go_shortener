@@ -176,7 +176,8 @@ func (a *URLShortener) GetUrlsByUser(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	marshal, err := json.Marshal(strg)
+	bucket := MapToBucket(a.baseURL, strg)
+	marshal, err := json.Marshal(bucket)
 	if err != nil {
 		log.Debug().Msg(fmt.Sprintf("marshal error: %s", err))
 		res.WriteHeader(http.StatusInternalServerError)
