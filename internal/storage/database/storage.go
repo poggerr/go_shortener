@@ -133,7 +133,6 @@ func (strg *Storage) GetUserStorage(ctx context.Context, user *uuid.UUID, defURL
 		if err = rows.Scan(&url.UserID, &url.LongURL, &url.ShortURL, &url.DeletedFlag); err != nil {
 			return nil, err
 		}
-		url.ShortURL = defURL + "/" + url.ShortURL
 		userStorage[url.ShortURL] = url.LongURL
 	}
 

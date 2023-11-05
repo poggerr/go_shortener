@@ -25,7 +25,7 @@ func MapToBucket(baseURL string, m map[string]string) *[]BucketItem {
 	bucket := make([]BucketItem, 0, len(m))
 	for k, v := range m {
 		bucket = append(bucket, BucketItem{
-			ShortURL:    fmt.Sprintf("%s%s", baseURL, k),
+			ShortURL:    fmt.Sprintf("%s/%s", baseURL, k),
 			OriginalURL: v,
 		})
 	}
