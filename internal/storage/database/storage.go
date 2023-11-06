@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/poggerr/go_shortener/internal/handlers"
 	"github.com/poggerr/go_shortener/internal/models"
 	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
@@ -59,7 +60,7 @@ func NewStorage(db *sql.DB) (*Storage, error) {
 
 	s.delBatch = make(chan userID)
 	s.done = make(chan bool)
-	go s.unstoreConsume()
+	go s.deleteConsume()
 
 	return &s, nil
 }
@@ -90,7 +91,7 @@ func (strg *Storage) Restore(ctx context.Context, shortURL string) (link string,
 	case errScan != nil:
 		return "", errScan
 	case isDelete:
-		return "", errors.New("ссылка удалена")
+		return "", handlers.ErrLinkIsDeleted
 	}
 	return
 }
@@ -116,7 +117,7 @@ func (strg *Storage) deleteWork(ch chan userID) {
 	}
 }
 
-func (s *Storage) unstoreConsume() {
+func (s *Storage) deleteConsume() {
 	flush := func() {
 		for {
 			time.Sleep(time.Second)
@@ -133,7 +134,7 @@ func (s *Storage) unstoreConsume() {
 		case <-s.done:
 			if i != 0 {
 				log.Debug().Msg(fmt.Sprint(buf[:i]))
-				err := s.unstoreBatch(buf[:i])
+				err := s.deleteBatch(buf[:i])
 				if err != nil {
 					log.Err(err).Send()
 				}
@@ -145,7 +146,7 @@ func (s *Storage) unstoreConsume() {
 			}
 			if i == len(buf) {
 				log.Debug().Msg(fmt.Sprint(buf))
-				err := s.unstoreBatch(buf)
+				err := s.deleteBatch(buf)
 				if err != nil {
 					log.Err(err).Send()
 				}
@@ -157,7 +158,7 @@ func (s *Storage) unstoreConsume() {
 	}
 }
 
-func (s *Storage) unstoreBatch(ids []userID) error {
+func (s *Storage) deleteBatch(ids []userID) error {
 	// шаг 1 — объявляем транзакцию
 	tx, err := s.database.Begin()
 	if err != nil {

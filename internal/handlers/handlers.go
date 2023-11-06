@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/poggerr/go_shortener/internal/authorization"
@@ -14,6 +15,8 @@ import (
 	"net/http"
 	"time"
 )
+
+var ErrLinkIsDeleted = errors.New("ссылка удалена")
 
 type URLShortener struct {
 	linkRepo service.URLShortenerService
@@ -198,12 +201,16 @@ func (a *URLShortener) ReadOriginalURL(res http.ResponseWriter, req *http.Reques
 	defer cancel()
 
 	ans, err := a.linkRepo.Restore(ctx, shortURL)
-	if err != nil {
+	switch {
+	case errors.Is(err, ErrLinkIsDeleted):
+		log.Debug().Err(err)
+		res.WriteHeader(http.StatusGone)
+		return
+	case err != nil:
 		log.Debug().Msg(fmt.Sprintf("error: %s", err))
 		res.WriteHeader(http.StatusNoContent)
 		return
 	}
-
 	res.Header().Set("content-type", "text/plain ")
 	res.Header().Set("Location", ans)
 	res.WriteHeader(307)
