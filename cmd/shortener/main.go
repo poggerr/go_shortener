@@ -15,11 +15,17 @@ import (
 )
 
 var (
-	cfg  *config.Config
-	repo service.URLShortenerService
+	buildVersion = "N/A"
+	buildDate    = "N/A"
+	buildCommit  = "N/A"
+	cfg          *config.Config
+	repo         service.URLShortenerService
 )
 
 func main() {
+	fmt.Printf("Build version: %s\n", buildVersion)
+	fmt.Printf("Build date: %s\n", buildDate)
+	fmt.Printf("Build commit: %s\n", buildCommit)
 	srv := CreateServer()
 	Run(srv)
 }

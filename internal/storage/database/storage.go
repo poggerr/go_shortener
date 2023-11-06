@@ -11,10 +11,10 @@ import (
 	"github.com/poggerr/go_shortener/internal/models"
 	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
+	"github.com/rs/zerolog/log"
 	"time"
 )
 
-// TODO переписать
 type Storage struct {
 	database *sql.DB
 	done     chan bool
@@ -24,6 +24,7 @@ type Storage struct {
 var _ service.URLShortenerService = (*Storage)(nil)
 
 func NewStorage(db *sql.DB) (*Storage, error) {
+	s := Storage{database: db}
 	tx, err := db.Begin()
 	if err != nil {
 		return nil, err
@@ -55,9 +56,12 @@ func NewStorage(db *sql.DB) (*Storage, error) {
 	}
 
 	tx.Commit()
-	return &Storage{
-		database: db,
-	}, nil
+
+	s.delBatch = make(chan userID)
+	s.done = make(chan bool)
+	go s.unstoreConsume()
+
+	return &s, nil
 }
 
 func (strg *Storage) Store(ctx context.Context, user *uuid.UUID, longURL string) (id string, err error) {
@@ -91,37 +95,113 @@ func (strg *Storage) Restore(ctx context.Context, shortURL string) (link string,
 	return
 }
 
-func (strg *Storage) Delete(ctx context.Context, user *uuid.UUID, ids []string) {
-	return
+func (strg *Storage) Delete(_ context.Context, user *uuid.UUID, ids []string) {
+	ch := make(chan userID)
+	go strg.deleteProduce(user, ids, ch)
+	go strg.deleteWork(ch)
+
 }
 
-//// UserURLs структура для удаления ссылок
-//type UserURLs struct {
-//	UserID *uuid.UUID
-//	URLs   []string
-//}
-//
-//// DeleteUrls удаление ссылок
-//
-//// TODO переписать удаление
-//func (strg *Storage) DeleteUrls(mas UserURLs) {
-//	tx, err := strg.DB.Begin()
-//	if err != nil {
-//		logger.Initialize().Error(err)
-//	}
-//	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-//	defer cancel()
-//
-//	for _, m := range mas.URLs {
-//		_, err = tx.ExecContext(ctx, "UPDATE urls SET is_deleted=true WHERE short_url=$1 AND user_id=$2", m, mas.UserID)
-//		if err != nil {
-//			logger.Initialize().Info("Ошибка при удалении", err)
-//		}
-//	}
-//	tx.Commit()
-//}
+func (strg *Storage) deleteProduce(user *uuid.UUID, ids []string, ch chan userID) {
+	for i, id := range ids {
+		ch <- userID{User: user, ID: id}
+		log.Debug().Msgf("%v", i)
+	}
+	close(ch)
+}
 
-func (strg *Storage) GetUserStorage(ctx context.Context, user *uuid.UUID, defURL string) (map[string]string, error) {
+func (strg *Storage) deleteWork(ch chan userID) {
+	for id := range ch {
+		strg.delBatch <- id
+	}
+}
+
+func (s *Storage) unstoreConsume() {
+	flush := func() {
+		for {
+			time.Sleep(time.Second)
+			s.done <- true
+		}
+	}
+
+	go flush()
+
+	var buf = make([]userID, 10)
+	i := 0
+	for {
+		select {
+		case <-s.done:
+			if i != 0 {
+				log.Debug().Msg(fmt.Sprint(buf[:i]))
+				err := s.unstoreBatch(buf[:i])
+				if err != nil {
+					log.Err(err).Send()
+				}
+				i = 0
+			}
+		case id, ok := <-s.delBatch:
+			if !ok {
+				return
+			}
+			if i == len(buf) {
+				log.Debug().Msg(fmt.Sprint(buf))
+				err := s.unstoreBatch(buf)
+				if err != nil {
+					log.Err(err).Send()
+				}
+				i = 0
+			}
+			buf[i] = id
+			i++
+		}
+	}
+}
+
+func (s *Storage) unstoreBatch(ids []userID) error {
+	// шаг 1 — объявляем транзакцию
+	tx, err := s.database.Begin()
+	if err != nil {
+		return err
+	}
+	// шаг 1.1 — если возникает ошибка, откатываем изменения
+	defer func() {
+		if err = tx.Rollback(); err != nil {
+			log.Err(err).Send()
+		}
+	}()
+
+	// Это чтобы мы тут тоже не зависли надолго
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	defer cancel()
+	// шаг 2 — готовим инструкцию
+	stmt, err := tx.PrepareContext(ctx, "UPDATE urls SET is_deleted=true WHERE short_url=$1 AND user_id=$2")
+	if err != nil {
+		return err
+	}
+	// шаг 2.1 — не забываем закрыть инструкцию, когда она больше не нужна
+	defer func() {
+		if err = stmt.Close(); err != nil {
+			log.Err(err).Send()
+		}
+	}()
+
+	// шаг 3 - выполняем задачу
+	for _, id := range ids {
+		_, err = stmt.ExecContext(ctx, id.ID, id.User)
+		if err != nil {
+			return err
+		}
+	}
+
+	// шаг 4 — сохраняем изменения
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (strg *Storage) GetUserStorage(ctx context.Context, user *uuid.UUID, _ string) (map[string]string, error) {
 	rows, err := strg.database.QueryContext(ctx, "SELECT * FROM urls WHERE user_id=$1", user)
 	if err != nil {
 		return nil, err
@@ -168,7 +248,7 @@ func (strg *Storage) Ping(ctx context.Context) error {
 }
 
 type userID struct {
-	User string
+	User *uuid.UUID
 	ID   string
 }
 
@@ -181,32 +261,3 @@ func (s *Storage) Close() error {
 	close(s.done)
 	return s.database.Close()
 }
-
-//type URLRepo struct {
-//	urlsToDeleteChan chan storage.UserURLs
-//	repository       storage.Storage
-//}
-//
-//func NewDeleter(strg *storage.Storage) *URLRepo {
-//	return &URLRepo{
-//		urlsToDeleteChan: make(chan storage.UserURLs, 10),
-//		repository:       *strg,
-//	}
-//}
-//
-//func (r *URLRepo) DeleteAsync(ids []string, userID *uuid.UUID) error {
-//	r.urlsToDeleteChan <- storage.UserURLs{UserID: userID, URLs: ids}
-//	return nil
-//}
-//
-//// WorkerDeleteURLs воркер удаления ссылок
-//func (r *URLRepo) WorkerDeleteURLs(ctx context.Context) {
-//	for urls := range r.urlsToDeleteChan {
-//		select {
-//		case <-ctx.Done():
-//			return
-//		default:
-//			r.repository.DeleteUrls(urls)
-//		}
-//	}
-//}
