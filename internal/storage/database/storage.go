@@ -163,12 +163,6 @@ func (s *Storage) unstoreBatch(ids []userID) error {
 	if err != nil {
 		return err
 	}
-	// шаг 1.1 — если возникает ошибка, откатываем изменения
-	defer func() {
-		if err = tx.Rollback(); err != nil {
-			log.Err(err).Send()
-		}
-	}()
 
 	// Это чтобы мы тут тоже не зависли надолго
 	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
@@ -189,6 +183,7 @@ func (s *Storage) unstoreBatch(ids []userID) error {
 	for _, id := range ids {
 		_, err = stmt.ExecContext(ctx, id.ID, id.User)
 		if err != nil {
+			fmt.Println(err)
 			return err
 		}
 	}
