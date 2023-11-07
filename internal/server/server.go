@@ -16,7 +16,6 @@ func Server(addr, baseURL string, repo service.URLShortenerService) *http.Server
 	Repo := repo
 	handler := handlers.NewURLShortener(baseURL, Repo)
 	r := chi.NewRouter()
-	//r.Use(middleware.RealIP)
 	r.Use(httplog.RequestLogger(log.Logger))
 
 	r.Use(authorization.AuthMiddleware, gzip.GzipMiddleware)

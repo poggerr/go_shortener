@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/fatih/errwrap/errwrap"
+	"github.com/masibw/goone"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"
 	"golang.org/x/tools/go/analysis/passes/asmdecl"
@@ -57,7 +59,6 @@ func main() {
 		}
 	}
 	mychecks = append(mychecks,
-		// all linters from golang.org/x/tools/go/analysis/passes
 		asmdecl.Analyzer,
 		assign.Analyzer,
 		atomic.Analyzer,
@@ -97,11 +98,9 @@ func main() {
 		unsafeptr.Analyzer,
 		unusedresult.Analyzer,
 		unusedwrite.Analyzer,
-		//// two external linters
-		//errwrap.Analyzer,
-		//goone.Analyzer,
-		//// my own linter
-		//linter.ExitInMainAnalyzer,
+		errwrap.Analyzer,
+		goone.Analyzer,
+		//analyzer.OsExitCheckAnalyzer,
 	)
 	multichecker.Main(mychecks...)
 }

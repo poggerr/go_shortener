@@ -254,6 +254,8 @@ func (s *Storage) Close() error {
 	s.done <- true
 	// важен порядок закрытия!
 	close(s.delBatch)
+	fmt.Println("delBatch close")
 	close(s.done)
+	fmt.Println("done close")
 	return s.database.Close()
 }

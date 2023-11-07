@@ -48,6 +48,7 @@ func Run(srv *http.Server) {
 	})
 
 	if err := g.Wait(); err != nil {
+		repo.Close()
 		fmt.Printf("exit reason: %s \n", err)
 	}
 
