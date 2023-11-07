@@ -117,11 +117,11 @@ func (strg *Storage) deleteWork(ch chan userID) {
 	}
 }
 
-func (s *Storage) deleteConsume() {
+func (strg *Storage) deleteConsume() {
 	flush := func() {
 		for {
 			time.Sleep(time.Second)
-			s.done <- true
+			strg.done <- true
 		}
 	}
 
@@ -131,22 +131,22 @@ func (s *Storage) deleteConsume() {
 	i := 0
 	for {
 		select {
-		case <-s.done:
+		case <-strg.done:
 			if i != 0 {
 				log.Debug().Msg(fmt.Sprint(buf[:i]))
-				err := s.deleteBatch(buf[:i])
+				err := strg.deleteBatch(buf[:i])
 				if err != nil {
 					log.Err(err).Send()
 				}
 				i = 0
 			}
-		case id, ok := <-s.delBatch:
+		case id, ok := <-strg.delBatch:
 			if !ok {
 				return
 			}
 			if i == len(buf) {
 				log.Debug().Msg(fmt.Sprint(buf))
-				err := s.deleteBatch(buf)
+				err := strg.deleteBatch(buf)
 				if err != nil {
 					log.Err(err).Send()
 				}
@@ -158,9 +158,9 @@ func (s *Storage) deleteConsume() {
 	}
 }
 
-func (s *Storage) deleteBatch(ids []userID) error {
+func (strg *Storage) deleteBatch(ids []userID) error {
 	// шаг 1 — объявляем транзакцию
-	tx, err := s.database.Begin()
+	tx, err := strg.database.Begin()
 	if err != nil {
 		return err
 	}
@@ -249,13 +249,12 @@ type userID struct {
 }
 
 // Close закрывает базу данных
-// TODO переписать
-func (s *Storage) Close() error {
-	s.done <- true
+func (strg *Storage) Close() error {
+	strg.done <- true
 	// важен порядок закрытия!
-	close(s.delBatch)
+	close(strg.delBatch)
 	fmt.Println("delBatch close")
-	close(s.done)
+	close(strg.done)
 	fmt.Println("done close")
-	return s.database.Close()
+	return strg.database.Close()
 }
