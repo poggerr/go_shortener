@@ -35,6 +35,7 @@ func NewStorage(db *sql.DB) (*Storage, error) {
 			log.Err(err).Send()
 		}
 	}()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
