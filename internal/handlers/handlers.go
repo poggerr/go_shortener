@@ -144,11 +144,11 @@ func (a *URLShortener) CreateJSONShorten(res http.ResponseWriter, req *http.Requ
 
 	res.Header().Set("content-type", "application/json ")
 	shortURL, err := a.linkRepo.Store(ctx, userID, url.LongURL)
-	switch err {
-	case nil:
-		res.WriteHeader(http.StatusCreated)
-	case err:
+	switch {
+	case err != nil:
 		res.WriteHeader(http.StatusConflict)
+	default:
+		res.WriteHeader(http.StatusCreated)
 	}
 
 	shortURL = a.baseURL + "/" + shortURL
@@ -213,7 +213,7 @@ func (a *URLShortener) ReadOriginalURL(res http.ResponseWriter, req *http.Reques
 	}
 	res.Header().Set("content-type", "text/plain ")
 	res.Header().Set("Location", ans)
-	res.WriteHeader(307)
+	res.WriteHeader(http.StatusTemporaryRedirect)
 
 }
 

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/fatih/errwrap/errwrap"
 	"github.com/masibw/goone"
+	"github.com/poggerr/go_shortener/internal/analyzer"
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"
 	"golang.org/x/tools/go/analysis/passes/asmdecl"
@@ -100,7 +101,7 @@ func main() {
 		unusedwrite.Analyzer,
 		errwrap.Analyzer,
 		goone.Analyzer,
-		//analyzer.OsExitCheckAnalyzer,
+		analyzer.OsExitCheckAnalyzer,
 	)
 	multichecker.Main(mychecks...)
 }

@@ -28,6 +28,7 @@ func NewStorage(db *sql.DB) (*Storage, error) {
 	s := Storage{database: db}
 	tx, err := db.Begin()
 	if err != nil {
+		tx.Rollback()
 		return nil, err
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
