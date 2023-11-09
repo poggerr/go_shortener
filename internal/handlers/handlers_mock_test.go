@@ -55,5 +55,4 @@ func (rm RepoMock) Ping(_ context.Context) error {
 }
 
 func (rm RepoMock) Delete(_ context.Context, _ *uuid.UUID, _ []string) {
-	return
 }

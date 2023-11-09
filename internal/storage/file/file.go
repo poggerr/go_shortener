@@ -43,13 +43,13 @@ func NewStorage(filename string) (fs *Storage, err error) {
 
 // isExist проверяет наличие в файле указанного ID
 // Если такой ID входит как подстрока в ссылку, то результат будет такой же, как если бы был найден ID
-func (s *Storage) isExist(_ context.Context, id string) bool {
-	_, err := s.storageReader.file.Seek(0, io.SeekStart)
+func (strg *Storage) isExist(_ context.Context, id string) bool {
+	_, err := strg.storageReader.file.Seek(0, io.SeekStart)
 	if err != nil {
 		return false
 	}
 
-	scanner := bufio.NewScanner(s.storageReader.file)
+	scanner := bufio.NewScanner(strg.storageReader.file)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), id) {
 			// Не обрабатывается ситуация, когда в одной из ссылок может быть подстрока равная ID
@@ -91,17 +91,17 @@ func (strg *Storage) store(user string, shortURL string, origURL string) error {
 }
 
 // Restore - находит по ID ссылку во внешнем файле, где данные хранятся в формате JSON
-func (s *Storage) Restore(_ context.Context, id string) (link string, err error) {
-	s.mx.Lock()
-	defer s.mx.Unlock()
+func (strg *Storage) Restore(_ context.Context, id string) (link string, err error) {
+	strg.mx.Lock()
+	defer strg.mx.Unlock()
 
-	_, err = s.storageReader.file.Seek(0, io.SeekStart)
+	_, err = strg.storageReader.file.Seek(0, io.SeekStart)
 	if err != nil {
 		return "", err
 	}
 
 	for {
-		alias, err := s.storageReader.Read()
+		alias, err := strg.storageReader.Read()
 		if err != nil {
 			return "", fmt.Errorf("link not found: %s", id)
 		}
@@ -115,22 +115,22 @@ func (s *Storage) Restore(_ context.Context, id string) (link string, err error)
 // Delete - помечает список ранее сохраненных ссылок удаленными
 // только тех ссылок, которые принадлежат пользователю
 // Только для совместимости контракта
-func (s *Storage) Delete(_ context.Context, _ *uuid.UUID, _ []string) {
+func (strg *Storage) Delete(_ context.Context, _ *uuid.UUID, _ []string) {
 	panic("not implemented for file storage")
 }
 
 // GetUserStorage возвращает map[id]link ранее сокращенных ссылок указанным пользователем
-func (s *Storage) GetUserStorage(_ context.Context, user *uuid.UUID, _ string) (map[string]string, error) {
-	s.mx.Lock()
-	defer s.mx.Unlock()
+func (strg *Storage) GetUserStorage(_ context.Context, user *uuid.UUID, _ string) (map[string]string, error) {
+	strg.mx.Lock()
+	defer strg.mx.Unlock()
 
 	m := make(map[string]string)
-	_, err := s.storageReader.file.Seek(0, io.SeekStart)
+	_, err := strg.storageReader.file.Seek(0, io.SeekStart)
 	if err != nil {
 		return m, err
 	}
 
-	scanner := bufio.NewScanner(s.storageReader.file)
+	scanner := bufio.NewScanner(strg.storageReader.file)
 	for scanner.Scan() {
 		txt := scanner.Text()
 		if strings.Contains(txt, user.String()) {
@@ -151,16 +151,16 @@ func (s *Storage) GetUserStorage(_ context.Context, user *uuid.UUID, _ string) (
 }
 
 // StoreBatch сохраняет пакет ссылок из map[correlation_id]original_link и возвращает map[correlation_id]short_link
-func (s *Storage) StoreBatch(ctx context.Context, user *uuid.UUID, batchIn models.BatchList, defURL string) (models.BatchList, error) {
-	s.mx.Lock()
-	defer s.mx.Unlock()
+func (strg *Storage) StoreBatch(ctx context.Context, user *uuid.UUID, batchIn models.BatchList, defURL string) (models.BatchList, error) {
+	strg.mx.Lock()
+	defer strg.mx.Unlock()
 
 	for corrID, link := range batchIn {
-		shortURL, err := utils.CreateShortURL(ctx, s.isExist)
+		shortURL, err := utils.CreateShortURL(ctx, strg.isExist)
 		if err != nil {
 			return nil, err
 		}
-		err = s.store(user.String(), shortURL, link.OriginalURL)
+		err = strg.store(user.String(), shortURL, link.OriginalURL)
 		if err != nil {
 			return nil, err
 		}
@@ -171,12 +171,12 @@ func (s *Storage) StoreBatch(ctx context.Context, user *uuid.UUID, batchIn model
 }
 
 // Ping проверяет, что файл хранения доступен и экземпляры инициализированы
-func (s *Storage) Ping(_ context.Context) error {
-	_, err := s.storageWriter.file.Stat()
+func (strg *Storage) Ping(_ context.Context) error {
+	_, err := strg.storageWriter.file.Stat()
 	if err != nil {
 		return err
 	}
-	_, err = s.storageReader.file.Stat()
+	_, err = strg.storageReader.file.Stat()
 	if err != nil {
 		return err
 	}
@@ -235,9 +235,9 @@ func (p *Writer) Close() error {
 	return p.file.Close()
 }
 
-func (s *Storage) Close() error {
-	err1 := s.storageReader.Close()
-	err2 := s.storageWriter.Close()
+func (strg *Storage) Close() error {
+	err1 := strg.storageReader.Close()
+	err2 := strg.storageWriter.Close()
 	if err1 != nil {
 		return err1
 	}

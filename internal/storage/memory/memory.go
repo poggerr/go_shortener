@@ -113,7 +113,6 @@ func (s *Storage) StoreBatch(ctx context.Context, user *uuid.UUID, batchIn model
 }
 
 func (s *Storage) Delete(_ context.Context, _ *uuid.UUID, _ []string) {
-	return
 }
 
 // Ping проверяет, что экземпляр Storage создан корректно, например с помощью NewStorage()
