@@ -17,7 +17,7 @@ type Config struct {
 	Path        string `env:"FILE_STORAGE_PATH" json:"file_storage_path"`
 	DB          string `env:"DATABASE_DSN" json:"database_dsn"`
 	EnableHTTPS bool   `env:"ENABLE_HTTPS" json:"enable_https"`
-	ConfigJson  string `env:"CONFIG"`
+	ConfigJSON  string `env:"CONFIG"`
 }
 
 // NewConf конструктор конфигурации
@@ -32,25 +32,25 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
 	flag.StringVar(&cfg.DB, "d", "host=localhost user=shortener password=password dbname=shortener sslmode=disable", "write down db")
 	flag.BoolVar(&cfg.EnableHTTPS, "s", false, "write down enable https")
-	flag.StringVar(&cfg.ConfigJson, "c", "", "write down config json")
+	flag.StringVar(&cfg.ConfigJSON, "c", "", "write down config json")
 	flag.Parse()
 
 	if err := env.Parse(cfg); err != nil {
 		fmt.Printf("%+v\n", err)
 	}
 
-	if len(cfg.ConfigJson) > 0 {
-		cfg.GetJsonConfigData()
+	if len(cfg.ConfigJSON) > 0 {
+		cfg.GetJSONConfigData()
 	}
 
 	return cfg
 }
 
-func (c *Config) GetJsonConfigData() {
+func (c *Config) GetJSONConfigData() {
 	log.Info().Msg("load data from json file")
-	file, err := os.Open(c.ConfigJson)
+	file, err := os.Open(c.ConfigJSON)
 	if err != nil {
-		log.Err(err).Msgf("can't open file: %s", c.ConfigJson)
+		log.Err(err).Msgf("can't open file: %s", c.ConfigJSON)
 		return
 	}
 	defer func(file *os.File) {
@@ -62,6 +62,6 @@ func (c *Config) GetJsonConfigData() {
 
 	err = json.NewDecoder(file).Decode(c)
 	if err != nil {
-		log.Err(err).Msgf("can't read config from given file: %s", c.ConfigJson)
+		log.Err(err).Msgf("can't read config from given file: %s", c.ConfigJSON)
 	}
 }
