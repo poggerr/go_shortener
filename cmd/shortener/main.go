@@ -37,7 +37,7 @@ func CreateServer() *http.Server {
 }
 
 func Run(srv *http.Server) {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer stop()
 
 	const (
@@ -48,7 +48,7 @@ func Run(srv *http.Server) {
 	g, gCtx := errgroup.WithContext(ctx)
 
 	g.Go(func() error {
-		if cfg.EnableHTTPS == "true" {
+		if cfg.EnableHTTPS {
 			log.Info().Msg("HTTPS enabled")
 			err := utils.CreateTLSCert(cert, key)
 			if err != nil {
