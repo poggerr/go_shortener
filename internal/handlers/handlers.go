@@ -16,7 +16,10 @@ import (
 	"time"
 )
 
-var ErrLinkIsDeleted = errors.New("ссылка удалена")
+var (
+	ErrLinkIsDeleted = errors.New("ссылка удалена")
+	ErrLinkNotFound  = errors.New("ссылка не найдена")
+)
 
 type URLShortener struct {
 	linkRepo service.URLShortenerService
@@ -53,9 +56,16 @@ func (a *URLShortener) CreateShortURL(res http.ResponseWriter, req *http.Request
 
 	shortURL, err := a.linkRepo.Store(ctx, userID, string(body))
 	if err != nil {
-		res.WriteHeader(http.StatusConflict)
-		res.Write([]byte(a.baseURL + "/" + shortURL))
-		return
+		switch {
+		case shortURL != "":
+			res.WriteHeader(http.StatusConflict)
+			res.Write([]byte(a.baseURL + "/" + shortURL))
+			return
+		default:
+			log.Debug().Msg(fmt.Sprintf("store error: %s", err))
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	res.Header().Set("content-type", "text/plain; charset=utf-8")
@@ -144,13 +154,18 @@ func (a *URLShortener) CreateJSONShorten(res http.ResponseWriter, req *http.Requ
 
 	res.Header().Set("content-type", "application/json ")
 	shortURL, err := a.linkRepo.Store(ctx, userID, url.LongURL)
-	switch {
-	case err != nil:
-		res.WriteHeader(http.StatusConflict)
-	default:
-		res.WriteHeader(http.StatusCreated)
+	if err != nil {
+		switch {
+		case shortURL != "":
+			res.WriteHeader(http.StatusConflict)
+			res.Write([]byte(a.baseURL + "/" + shortURL))
+			return
+		default:
+			log.Debug().Msg(fmt.Sprintf("store error: %s", err))
+			res.WriteHeader(http.StatusInternalServerError)
+			return
+		}
 	}
-
 	shortURL = a.baseURL + "/" + shortURL
 	shortenMap := make(map[string]string)
 	shortenMap["result"] = shortURL
@@ -161,6 +176,7 @@ func (a *URLShortener) CreateJSONShorten(res http.ResponseWriter, req *http.Requ
 		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
+	res.WriteHeader(http.StatusCreated)
 	res.Write(marshal)
 
 }
@@ -202,13 +218,17 @@ func (a *URLShortener) ReadOriginalURL(res http.ResponseWriter, req *http.Reques
 
 	ans, err := a.linkRepo.Restore(ctx, shortURL)
 	switch {
+	case errors.Is(err, ErrLinkNotFound):
+		log.Debug().Err(err)
+		res.WriteHeader(http.StatusNoContent)
+		return
 	case errors.Is(err, ErrLinkIsDeleted):
 		log.Debug().Err(err)
 		res.WriteHeader(http.StatusGone)
 		return
 	case err != nil:
 		log.Debug().Msg(fmt.Sprintf("error: %s", err))
-		res.WriteHeader(http.StatusNoContent)
+		res.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	res.Header().Set("content-type", "text/plain ")
