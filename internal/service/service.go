@@ -22,6 +22,8 @@ type URLShortenerService interface {
 	StoreBatch(ctx context.Context, user *uuid.UUID, batchIn models.BatchList, defURL string) (models.BatchList, error)
 	// Ping проверяет готовность к работе репозитория.
 	Ping(context.Context) error
+
+	Statistics(ctx context.Context) (*models.Statistic, error)
 	// Close завершает работу репозитория в стиле graceful shutdown.
 	Close() error
 }

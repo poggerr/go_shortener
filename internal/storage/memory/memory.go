@@ -123,6 +123,18 @@ func (s *Storage) Ping(_ context.Context) error {
 	return nil
 }
 
+func (s *Storage) Statistics(ctx context.Context) (*models.Statistic, error) {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	var stat models.Statistic
+	stat.LinksCount = len(s.storage)
+	for _, usr := range s.storage {
+		stat.UsersCount += len(usr)
+	}
+	return &stat, nil
+}
+
 // Close ничего не делает, требуется только для совместимости с контрактом
 func (s *Storage) Close() error {
 	// Do nothing

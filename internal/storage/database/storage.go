@@ -260,6 +260,15 @@ type userID struct {
 	ID   string
 }
 
+func (strg *Storage) Statistics(ctx context.Context) (*models.Statistic, error) {
+	var stat models.Statistic
+	err := strg.database.QueryRowContext(ctx, "SELECT COUNT(1), COUNT(DISTINCT user_id) FROM urls").Scan(&stat.LinksCount, &stat.UsersCount)
+	if err != nil {
+		return nil, err
+	}
+	return &stat, nil
+}
+
 // Close закрывает базу данных
 func (strg *Storage) Close() error {
 	strg.done <- true

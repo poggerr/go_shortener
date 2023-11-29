@@ -56,3 +56,7 @@ func (rm RepoMock) Ping(_ context.Context) error {
 
 func (rm RepoMock) Delete(_ context.Context, _ *uuid.UUID, _ []string) {
 }
+
+func (rm RepoMock) Statistics(ctx context.Context) (*models.Statistic, error) {
+	return &models.Statistic{}, nil
+}
