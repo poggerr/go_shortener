@@ -36,7 +36,7 @@ func main() {
 }
 
 func CreateServer() *http.Server {
-	return server.Server(cfg.Serv, cfg.DefURL, repo, cfg.TRUSTED_SUBNET)
+	return server.Server(cfg.Serv, cfg.DefURL, repo, cfg.TrustedSubnet)
 }
 
 func CreateGRPCServer() *grpc.Server {
