@@ -9,10 +9,11 @@ import (
 
 // Config базовая структура конфигурации
 type Config struct {
-	Serv   string `env:"SERVER_ADDRESS"`
-	DefURL string `env:"BASE_URL"`
-	Path   string `env:"FILE_STORAGE_PATH"`
-	DB     string `env:"DATABASE_DSN"`
+	Serv        string `env:"SERVER_ADDRESS"`
+	DefURL      string `env:"BASE_URL"`
+	Path        string `env:"FILE_STORAGE_PATH"`
+	DB          string `env:"DATABASE_DSN"`
+	EnableHTTPS string `env:"ENABLE_HTTPS"`
 }
 
 // NewConf конструктор конфигурации
@@ -26,6 +27,7 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.DefURL, "b", "http://localhost:8080", "write down default url")
 	flag.StringVar(&cfg.Path, "f", "/tmp/short-url-db.json", "write down path to storage")
 	flag.StringVar(&cfg.DB, "d", "host=localhost user=shortener password=password dbname=shortener sslmode=disable", "write down db")
+	flag.StringVar(&cfg.EnableHTTPS, "s", "false", "write down enable https")
 	flag.Parse()
 
 	if err := env.Parse(cfg); err != nil {

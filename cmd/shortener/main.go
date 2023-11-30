@@ -7,6 +7,8 @@ import (
 	"github.com/poggerr/go_shortener/internal/config"
 	"github.com/poggerr/go_shortener/internal/server"
 	"github.com/poggerr/go_shortener/internal/service"
+	"github.com/poggerr/go_shortener/internal/utils"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 	"net/http"
 	"os"
@@ -38,8 +40,24 @@ func Run(srv *http.Server) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	const (
+		cert = "cert.pem"
+		key  = "key.pem"
+	)
+
 	g, gCtx := errgroup.WithContext(ctx)
+
 	g.Go(func() error {
+		if cfg.EnableHTTPS == "true" {
+			log.Info().Msg("HTTPS enabled")
+			err := utils.CreateTLSCert(cert, key)
+			if err != nil {
+				log.Fatal().Msgf("cert creation: %+v\n", err)
+			}
+			return srv.ListenAndServeTLS(cert, key)
+
+		}
+		log.Info().Msg("HTTPS is not enabled")
 		return srv.ListenAndServe()
 	})
 	g.Go(func() error {
@@ -51,48 +69,4 @@ func Run(srv *http.Server) {
 		repo.Close()
 		fmt.Printf("exit reason: %s \n", err)
 	}
-
-	//go func() {
-	//	err := srv.ListenAndServe()
-	//	if err != nil && err != http.ErrServerClosed {
-	//		log.Fatal().Msgf("listen: %+v\n", err)
-	//	}
-	//	log.Info().Msg("Server started")
-	//}()
-	//
-	//<-ctx.Done()
-	//
-	//log.Info().Msg("Server stopped")
-	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//defer func() {
-	//	err := repo.Close()
-	//	if err != nil {
-	//		log.Error().Msgf("Caught an error due closing repository:%+v", err)
-	//	}
-	//
-	//	log.Info().Msg("Everything is closed properly")
-	//	cancel()
-	//}()
-	//if err := srv.Shutdown(ctx); err != nil {
-	//	log.Error().Msgf("Server Shutdown Failed:%+v", err)
-	//}
-	//stop()
-	//log.Info().Msg("Server exited properly")
-
-	//log.Info().Msg("Server stopped")
-	//ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	//defer func() {
-	//	err := repo.Close()
-	//	if err != nil {
-	//		log.Error().Msgf("Caught an error due closing repository:%+v", err)
-	//	}
-	//
-	//	log.Info().Msg("Everything is closed properly")
-	//	cancel()
-	//}()
-	//if err := srv.Shutdown(ctx); err != nil {
-	//	log.Error().Msgf("Server Shutdown Failed:%+v", err)
-	//}
-	//stop()
-	//log.Info().Msg("Server exited properly")
 }
