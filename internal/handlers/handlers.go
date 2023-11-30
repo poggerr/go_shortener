@@ -323,7 +323,7 @@ func (a *URLShortener) Expand(ctx context.Context, request *pb.ExpandRequest) (*
 			return nil, status.Error(codes.NotFound, "link not found")
 		case errors.Is(err, ErrLinkIsDeleted):
 			return nil, status.Error(codes.NotFound, "link is deleted")
-		case err != nil:
+		default:
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 	}
@@ -333,10 +333,10 @@ func (a *URLShortener) Expand(ctx context.Context, request *pb.ExpandRequest) (*
 
 func (a *URLShortener) Batch(ctx context.Context, request *pb.ShortBatchRequest) (*pb.ShortBatchResponse, error) {
 	var resp pb.ShortBatchResponse
-	userId := uuid.MustParse(request.UserId)
+	userID := uuid.MustParse(request.UserId)
 
 	for _, url := range request.Original {
-		shortURL, err := a.linkRepo.Store(ctx, &userId, url.OriginalUrl)
+		shortURL, err := a.linkRepo.Store(ctx, &userID, url.OriginalUrl)
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
@@ -352,8 +352,8 @@ func (a *URLShortener) Batch(ctx context.Context, request *pb.ShortBatchRequest)
 
 func (a *URLShortener) GetUserBucket(ctx context.Context, request *pb.GetUserBucketRequest) (*pb.GetUserBucketResponse, error) {
 	var resp pb.GetUserBucketResponse
-	userId := uuid.MustParse(request.UserId)
-	urlsMap, err := a.linkRepo.GetUserStorage(ctx, &userId, a.baseURL)
+	userID := uuid.MustParse(request.UserId)
+	urlsMap, err := a.linkRepo.GetUserStorage(ctx, &userID, a.baseURL)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -380,7 +380,7 @@ func (a *URLShortener) Stats(ctx context.Context, empty *emptypb.Empty) (*pb.Sta
 }
 
 func (a *URLShortener) Delete(ctx context.Context, request *pb.DeleteRequest) (*emptypb.Empty, error) {
-	userId := uuid.MustParse(request.User)
-	a.linkRepo.Delete(ctx, &userId, request.Ids)
+	userID := uuid.MustParse(request.User)
+	a.linkRepo.Delete(ctx, &userID, request.Ids)
 	return &emptypb.Empty{}, nil
 }

@@ -183,17 +183,17 @@ func (strg *Storage) Ping(_ context.Context) error {
 	return nil
 }
 
-func (s *Storage) Statistics(ctx context.Context) (*models.Statistic, error) {
-	s.mx.Lock()
-	defer s.mx.Unlock()
+func (strg *Storage) Statistics(ctx context.Context) (*models.Statistic, error) {
+	strg.mx.Lock()
+	defer strg.mx.Unlock()
 
 	var stat models.Statistic
-	_, err := s.storageReader.file.Seek(0, io.SeekStart)
+	_, err := strg.storageReader.file.Seek(0, io.SeekStart)
 	if err != nil {
 		panic("file storage in failed state")
 	}
 
-	scanner := bufio.NewScanner(s.storageReader.file)
+	scanner := bufio.NewScanner(strg.storageReader.file)
 	for scanner.Scan() {
 		txt := scanner.Text()
 		alias := &Alias{}
