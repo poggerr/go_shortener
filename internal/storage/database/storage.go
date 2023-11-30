@@ -77,13 +77,17 @@ func (strg *Storage) Store(ctx context.Context, user *uuid.UUID, longURL string)
 	_, err = strg.database.ExecContext(ctx, "INSERT INTO urls (long_url, short_url, user_id) VALUES ($1, $2, $3)", longURL, shortURL, user)
 	if err != nil {
 		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code) {
+		switch {
+		case errors.As(err, &pgErr) && pgerrcode.IsIntegrityConstraintViolation(pgErr.Code):
 			ans := strg.database.QueryRowContext(ctx, "SELECT short_url FROM urls WHERE long_url=$1", longURL)
 			errScan := ans.Scan(&shortURL)
 			if errScan != nil {
-				fmt.Println(err)
+				err = errScan
+				return
 			}
 			return shortURL, err
+		default:
+			return "", err
 		}
 	}
 	return shortURL, err
@@ -94,6 +98,8 @@ func (strg *Storage) Restore(ctx context.Context, shortURL string) (link string,
 	ans := strg.database.QueryRowContext(ctx, "SELECT long_url, is_deleted FROM urls WHERE short_url=$1", shortURL)
 	errScan := ans.Scan(&link, &isDelete)
 	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return "", handlers.ErrLinkNotFound
 	case errScan != nil:
 		return "", errScan
 	case isDelete:
