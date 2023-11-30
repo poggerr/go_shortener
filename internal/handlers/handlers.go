@@ -299,9 +299,9 @@ func (a *URLShortener) GetStats(res http.ResponseWriter, _ *http.Request) {
 
 func (a *URLShortener) Shorten(ctx context.Context, request *pb.ShortRequest) (*pb.ShortResponse, error) {
 	var resp pb.ShortResponse
-	userId := uuid.MustParse(request.User)
+	userID := uuid.MustParse(request.User)
 
-	shortURL, err := a.linkRepo.Store(ctx, &userId, request.Url)
+	shortURL, err := a.linkRepo.Store(ctx, &userID, request.Url)
 	if err != nil {
 		switch {
 		case shortURL != "":
