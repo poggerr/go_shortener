@@ -6,11 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/poggerr/go_shortener/internal/authorization"
 	"github.com/poggerr/go_shortener/internal/models"
+	pb "github.com/poggerr/go_shortener/internal/proto"
 	"github.com/poggerr/go_shortener/internal/service"
 	"github.com/poggerr/go_shortener/internal/utils"
 	"github.com/rs/zerolog/log"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 	"io"
 	"net/http"
 	"time"
@@ -24,7 +29,10 @@ var (
 type URLShortener struct {
 	linkRepo service.URLShortenerService
 	baseURL  string
+	pb.UnimplementedShortenerServer
 }
+
+var _ pb.ShortenerServer = (*URLShortener)(nil)
 
 // NewURLShortener создает URLShortener и инициализирует его адресом, по которому будут доступны методы,
 // и репозиторием хранения ссылок.
@@ -287,4 +295,92 @@ func (a *URLShortener) GetStats(res http.ResponseWriter, _ *http.Request) {
 	res.WriteHeader(http.StatusOK)
 	res.Write(marshal)
 
+}
+
+func (a *URLShortener) Shorten(ctx context.Context, request *pb.ShortRequest) (*pb.ShortResponse, error) {
+	var resp pb.ShortResponse
+	userId := uuid.MustParse(request.User)
+
+	shortURL, err := a.linkRepo.Store(ctx, &userId, request.Url)
+	if err != nil {
+		switch {
+		case shortURL != "":
+			return nil, status.Error(codes.AlreadyExists, "link is already shortened")
+		default:
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	resp.ShortUrl = fmt.Sprintf("%s/%s", a.baseURL, shortURL)
+	return &resp, nil
+}
+
+func (a *URLShortener) Expand(ctx context.Context, request *pb.ExpandRequest) (*pb.ExpandResponse, error) {
+	var resp pb.ExpandResponse
+	url, err := a.linkRepo.Restore(ctx, request.ShortUrl)
+	if err != nil {
+		switch {
+		case errors.Is(err, ErrLinkNotFound):
+			return nil, status.Error(codes.NotFound, "link not found")
+		case errors.Is(err, ErrLinkIsDeleted):
+			return nil, status.Error(codes.NotFound, "link is deleted")
+		case err != nil:
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+	}
+	resp.Url = url
+	return &resp, nil
+}
+
+func (a *URLShortener) Batch(ctx context.Context, request *pb.ShortBatchRequest) (*pb.ShortBatchResponse, error) {
+	var resp pb.ShortBatchResponse
+	userId := uuid.MustParse(request.UserId)
+
+	for _, url := range request.Original {
+		shortURL, err := a.linkRepo.Store(ctx, &userId, url.OriginalUrl)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		ans := &pb.CorrelationShortURL{
+			CorrelationId: url.CorrelationId,
+			ShortUrl:      shortURL,
+			OriginalUrl:   url.OriginalUrl,
+		}
+		resp.Original = append(resp.Original, ans)
+	}
+	return &resp, nil
+}
+
+func (a *URLShortener) GetUserBucket(ctx context.Context, request *pb.GetUserBucketRequest) (*pb.GetUserBucketResponse, error) {
+	var resp pb.GetUserBucketResponse
+	userId := uuid.MustParse(request.UserId)
+	urlsMap, err := a.linkRepo.GetUserStorage(ctx, &userId, a.baseURL)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	resp.Pair = make([]*pb.Pair, 0, len(urlsMap))
+	for k, v := range urlsMap {
+		resp.Pair = append(resp.Pair, &pb.Pair{
+			ShortUrl:    k,
+			OriginalUrl: fmt.Sprintf("%s%s", a.baseURL, v),
+		})
+	}
+	return &resp, nil
+}
+
+func (a *URLShortener) Stats(ctx context.Context, empty *emptypb.Empty) (*pb.StatResponse, error) {
+	var resp pb.StatResponse
+	ans, err := a.linkRepo.Statistics(ctx)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	resp.Urls = int32(ans.LinksCount)
+	resp.User = int32(ans.UsersCount)
+	return &resp, nil
+}
+
+func (a *URLShortener) Delete(ctx context.Context, request *pb.DeleteRequest) (*emptypb.Empty, error) {
+	userId := uuid.MustParse(request.User)
+	a.linkRepo.Delete(ctx, &userId, request.Ids)
+	return &emptypb.Empty{}, nil
 }
