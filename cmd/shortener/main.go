@@ -10,6 +10,7 @@ import (
 	"github.com/poggerr/go_shortener/internal/utils"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
+	"google.golang.org/grpc"
 	"net/http"
 	"os"
 	"os/signal"
@@ -29,11 +30,16 @@ func main() {
 	fmt.Printf("Build date: %s\n", buildDate)
 	fmt.Printf("Build commit: %s\n", buildCommit)
 	srv := CreateServer()
+	//g := CreateGRPCServer()
 	Run(srv)
 }
 
 func CreateServer() *http.Server {
-	return server.Server(cfg.Serv, cfg.DefURL, repo)
+	return server.Server(cfg.Serv, cfg.DefURL, repo, cfg.TRUSTED_SUBNET)
+}
+
+func CreateGRPCServer() *grpc.Server {
+	return server.NewGRPCServer(cfg.DefURL, repo)
 }
 
 func Run(srv *http.Server) {
@@ -46,6 +52,19 @@ func Run(srv *http.Server) {
 	)
 
 	g, gCtx := errgroup.WithContext(ctx)
+
+	//log.Info().Msg("Start GRPC server...")
+	//
+	//g.Go(func() error {
+	//	listen, err := net.Listen("tcp", ":3200")
+	//	if err != nil {
+	//		log.Fatal().Msgf("listen: %+v\n", err)
+	//	}
+	//	if err = grpc.Serve(listen); err != nil {
+	//		log.Fatal().Msgf("serve: %+v\n", err)
+	//	}
+	//	return err
+	//})
 
 	g.Go(func() error {
 		if cfg.EnableHTTPS {

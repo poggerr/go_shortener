@@ -106,6 +106,21 @@ func (mr *MockURLShortenerServiceMockRecorder) Restore(ctx, id interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Restore", reflect.TypeOf((*MockURLShortenerService)(nil).Restore), ctx, id)
 }
 
+// Statistics mocks base method.
+func (m *MockURLShortenerService) Statistics(ctx context.Context) (*models.Statistic, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Statistics", ctx)
+	ret0, _ := ret[0].(*models.Statistic)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Statistics indicates an expected call of Statistics.
+func (mr *MockURLShortenerServiceMockRecorder) Statistics(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Statistics", reflect.TypeOf((*MockURLShortenerService)(nil).Statistics), ctx)
+}
+
 // Store mocks base method.
 func (m *MockURLShortenerService) Store(ctx context.Context, user *uuid.UUID, longURL string) (string, error) {
 	m.ctrl.T.Helper()

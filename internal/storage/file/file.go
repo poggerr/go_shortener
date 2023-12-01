@@ -183,6 +183,35 @@ func (strg *Storage) Ping(_ context.Context) error {
 	return nil
 }
 
+func (s *Storage) Statistics(ctx context.Context) (*models.Statistic, error) {
+	s.mx.Lock()
+	defer s.mx.Unlock()
+
+	var stat models.Statistic
+	_, err := s.storageReader.file.Seek(0, io.SeekStart)
+	if err != nil {
+		panic("file storage in failed state")
+	}
+
+	scanner := bufio.NewScanner(s.storageReader.file)
+	for scanner.Scan() {
+		txt := scanner.Text()
+		alias := &Alias{}
+		dec := json.NewDecoder(bytes.NewBufferString(txt))
+		if err = dec.Decode(&alias); err != nil {
+			panic("file storage is corrupted")
+		}
+		stat.LinksCount++
+		stat.UsersCount++
+	}
+
+	if err = scanner.Err(); err != nil {
+		panic("file storage is corrupted")
+	}
+
+	return &stat, nil
+}
+
 type Reader struct {
 	file    *os.File
 	decoder *json.Decoder

@@ -264,3 +264,27 @@ func (a *URLShortener) DeleteUrls(res http.ResponseWriter, req *http.Request) {
 
 	res.WriteHeader(http.StatusAccepted)
 }
+
+func (a *URLShortener) GetStats(res http.ResponseWriter, _ *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	stat, err := a.linkRepo.Statistics(ctx)
+	if err != nil {
+		log.Info().Msg(fmt.Sprintf("error: %s", err))
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	marshal, err := json.Marshal(stat)
+	if err != nil {
+		log.Debug().Msg(fmt.Sprintf("marshal error: %s", err))
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	res.Write(marshal)
+
+}
