@@ -11,6 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -30,19 +31,19 @@ func main() {
 	fmt.Printf("Build date: %s\n", buildDate)
 	fmt.Printf("Build commit: %s\n", buildCommit)
 	srv := CreateServer()
-	//g := CreateGRPCServer()
-	Run(srv)
+	g := CreateGRPCServer()
+	Run(srv, g)
 }
 
 func CreateServer() *http.Server {
-	return server.Server(cfg.Serv, cfg.DefURL, repo, cfg.TRUSTED_SUBNET)
+	return server.Server(cfg.Serv, cfg.DefURL, repo, cfg.TrustedSubnet)
 }
 
 func CreateGRPCServer() *grpc.Server {
 	return server.NewGRPCServer(cfg.DefURL, repo)
 }
 
-func Run(srv *http.Server) {
+func Run(srv *http.Server, grpc *grpc.Server) {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	defer stop()
 
@@ -53,18 +54,18 @@ func Run(srv *http.Server) {
 
 	g, gCtx := errgroup.WithContext(ctx)
 
-	//log.Info().Msg("Start GRPC server...")
-	//
-	//g.Go(func() error {
-	//	listen, err := net.Listen("tcp", ":3200")
-	//	if err != nil {
-	//		log.Fatal().Msgf("listen: %+v\n", err)
-	//	}
-	//	if err = grpc.Serve(listen); err != nil {
-	//		log.Fatal().Msgf("serve: %+v\n", err)
-	//	}
-	//	return err
-	//})
+	log.Info().Msg("Start GRPC server...")
+
+	g.Go(func() error {
+		listen, err := net.Listen("tcp", ":50051")
+		if err != nil {
+			log.Fatal().Msgf("listen: %+v\n", err)
+		}
+		if err = grpc.Serve(listen); err != nil {
+			log.Fatal().Msgf("serve: %+v\n", err)
+		}
+		return err
+	})
 
 	g.Go(func() error {
 		if cfg.EnableHTTPS {
@@ -81,6 +82,7 @@ func Run(srv *http.Server) {
 	})
 	g.Go(func() error {
 		<-gCtx.Done()
+		grpc.Stop()
 		return srv.Shutdown(context.Background())
 	})
 

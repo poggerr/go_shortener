@@ -12,13 +12,13 @@ import (
 
 // Config базовая структура конфигурации
 type Config struct {
-	Serv           string `env:"SERVER_ADDRESS" json:"server_address"`
-	DefURL         string `env:"BASE_URL" json:"base_url"`
-	Path           string `env:"FILE_STORAGE_PATH" json:"file_storage_path"`
-	DB             string `env:"DATABASE_DSN" json:"database_dsn"`
-	EnableHTTPS    bool   `env:"ENABLE_HTTPS" json:"enable_https"`
-	ConfigJSON     string `env:"CONFIG"`
-	TRUSTED_SUBNET string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
+	Serv          string `env:"SERVER_ADDRESS" json:"server_address"`
+	DefURL        string `env:"BASE_URL" json:"base_url"`
+	Path          string `env:"FILE_STORAGE_PATH" json:"file_storage_path"`
+	DB            string `env:"DATABASE_DSN" json:"database_dsn"`
+	EnableHTTPS   bool   `env:"ENABLE_HTTPS" json:"enable_https"`
+	ConfigJSON    string `env:"CONFIG"`
+	TrustedSubnet string `env:"TRUSTED_SUBNET" json:"trusted_subnet"`
 }
 
 // NewConf конструктор конфигурации
@@ -34,7 +34,7 @@ func NewConf() *Config {
 	flag.StringVar(&cfg.DB, "d", "host=localhost user=shortener password=password dbname=shortener sslmode=disable", "write down db")
 	flag.BoolVar(&cfg.EnableHTTPS, "s", false, "write down enable https")
 	flag.StringVar(&cfg.ConfigJSON, "c", "", "write down config json")
-	flag.StringVar(&cfg.TRUSTED_SUBNET, "t", "", "write down trusted subnet")
+	flag.StringVar(&cfg.TrustedSubnet, "t", "", "write down trusted subnet")
 	flag.Parse()
 
 	if err := env.Parse(cfg); err != nil {

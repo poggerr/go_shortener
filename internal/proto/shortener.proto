@@ -1,0 +1,80 @@
+syntax = "proto3";
+
+package shortener;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/poggerr/go_shortener";
+
+message ShortRequest {
+  string url = 1;
+  string user = 2;
+}
+
+message ShortResponse {
+  string shortUrl = 2;
+}
+
+message ExpandRequest {
+  string shortUrl = 1;
+}
+
+message ExpandResponse {
+  string url = 1;
+}
+
+message GetUserBucketRequest {
+  string user_id = 1;
+}
+
+message Pair {
+  string shortUrl = 1;
+  string originalUrl = 2;
+}
+
+message GetUserBucketResponse {
+  repeated Pair pair = 1;
+}
+
+message DeleteRequest {
+  string user = 1;
+  repeated string ids = 2;
+}
+
+message StatRequest {
+  string user = 1;
+}
+
+message StatResponse {
+  int32 user = 1;
+  int32 urls = 2;
+}
+
+message CorrelatedOriginalURL {
+  string correlation_id = 1;
+  string original_url = 2;
+}
+
+message ShortBatchRequest {
+  string user_id = 1;
+  repeated CorrelatedOriginalURL original = 2;
+}
+
+message CorrelationShortURL {
+  string correlation_id = 1;
+  string original_url = 2;
+  string short_url = 3;
+}
+
+message ShortBatchResponse {
+  repeated CorrelationShortURL original = 1;
+}
+
+service Shortener {
+  rpc Shorten(ShortRequest) returns (ShortResponse) {}
+  rpc Expand(ExpandRequest) returns (ExpandResponse) {}
+  rpc Batch(ShortBatchRequest) returns (ShortBatchResponse) {}
+  rpc GetUserBucket(GetUserBucketRequest) returns (GetUserBucketResponse) {}
+  rpc Stats(google.protobuf.Empty) returns (StatResponse) {}
+  rpc Delete(DeleteRequest) returns (google.protobuf.Empty) {}
+}
