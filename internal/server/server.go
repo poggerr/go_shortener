@@ -26,8 +26,8 @@ func Server(addr, baseURL string, repo service.URLShortenerService, trustedSubne
 			log.Fatal().Err(err).Msg("failed to parse trusted subnet")
 		}
 
-		r.Use(middleware.IPFilter(trustedNet))
-		r.Get("/api/internal/stats", handler.GetStats)
+		// Делаем фильтрацию только для internal-stats, а не для всего роутера.
+		r.With(middleware.IPFilter(trustedNet)).Get("/api/internal/stats", handler.GetStats)
 	}
 
 	r.Use(authorization.AuthMiddleware, gzip.GzipMiddleware)
@@ -38,7 +38,10 @@ func Server(addr, baseURL string, repo service.URLShortenerService, trustedSubne
 	r.Post("/api/shorten/batch", handler.CreateBatch)
 	r.Get("/api/user/urls", handler.GetUrlsByUser)
 	r.Delete("/api/user/urls", handler.DeleteUrls)
-	r.Get("/api/internal/stats", handler.GetStats)
+	// Если trusted subnet не задан, то internal-stats остаётся защищённым cookie.
+	if trustedSubnet == "" {
+		r.Get("/api/internal/stats", handler.GetStats)
+	}
 
 	server := &http.Server{
 		Addr:           addr,

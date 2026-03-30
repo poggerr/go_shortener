@@ -2,6 +2,7 @@
 package authorization
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -17,15 +18,20 @@ type Claims struct {
 const TokenExp = time.Hour * 3
 
 // BuildJWTString создание JWT
-func BuildJWTString(uuid *uuid.UUID) (string, error) {
-
-	var secretKey = os.Getenv("SECRET_KEY")
+func BuildJWTString(userID *uuid.UUID) (string, error) {
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		return "", fmt.Errorf("SECRET_KEY is not set")
+	}
+	if userID == nil {
+		return "", fmt.Errorf("userID is nil")
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TokenExp)),
 		},
-		UserID: uuid,
+		UserID: userID,
 	})
 	tokenString, err := token.SignedString([]byte(secretKey))
 	if err != nil {
@@ -36,11 +42,21 @@ func BuildJWTString(uuid *uuid.UUID) (string, error) {
 
 // GetUserID получение userID по токену
 func GetUserID(tokenString string) *uuid.UUID {
-	//var secretKey = os.Getenv("SECRET_KEY")
-	var secretKey = "scdcsdc,HVJHVCAJscdJccdsJVDVJDvqwe[p[;cqsc09cah989h"
+	secretKey := os.Getenv("SECRET_KEY")
+	if secretKey == "" {
+		return nil
+	}
+
 	claims := &Claims{}
-	jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
+		// Явно проверяем алгоритм, чтобы избежать некорректной подписи.
+		if t.Method != jwt.SigningMethodHS256 {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
 		return []byte(secretKey), nil
 	})
+	if err != nil || token == nil || !token.Valid {
+		return nil
+	}
 	return claims.UserID
 }

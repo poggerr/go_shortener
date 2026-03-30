@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -19,7 +18,8 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			uuidUserID := uuid.New()
 			jwtString, err := BuildJWTString(&uuidUserID)
 			if err != nil {
-				fmt.Println(err.Error())
+				http.Error(w, "authorization failed: "+err.Error(), http.StatusInternalServerError)
+				return
 			}
 
 			cook := &http.Cookie{
@@ -37,6 +37,25 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			return
 		}
 		user := GetUserID(c.Value)
+		if user == nil {
+			// Если токен неверный/просрочен — выдаём новый.
+			uuidUserID := uuid.New()
+			jwtString, err := BuildJWTString(&uuidUserID)
+			if err != nil {
+				http.Error(w, "authorization failed: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			cook := &http.Cookie{
+				Name:    "session_token",
+				Value:   jwtString,
+				Path:    "/",
+				Domain:  "localhost",
+				Expires: time.Now().Add(120 * time.Second),
+			}
+			http.SetCookie(w, cook)
+			user = &uuidUserID
+		}
 
 		ur := r.WithContext(NewContext(r.Context(), user))
 
@@ -56,7 +75,9 @@ func NewContext(ctx context.Context, user *uuid.UUID) context.Context {
 func FromContext(ctx context.Context) *uuid.UUID {
 	u := ctx.Value(ReqUserKey)
 	if u != nil {
-		return u.(*uuid.UUID)
+		if user, ok := u.(*uuid.UUID); ok && user != nil {
+			return user
+		}
 	}
 	id := uuid.New()
 	return &id
